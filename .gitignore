@@ -1,0 +1,49 @@
+# User-specific files
+*.swp
+*.swo
+*.DS_Store
+*.idea/
+.vscode/
+
+# Xcode specific files
+build/
+DerivedData/
+xcuserdata/
+
+# Firebase configuration files
+GoogleService-Info.plist
+
+# Firebase config
+Secrets.xcconfig
+
+# Swift Package Manager
+/.build
+/.swiftpm
+Package.resolved
+
+# CocoaPods
+Pods/
+podfile.lock
+
+# Carthage
+Carthage/Build/
+
+# Xcode workspace settings
+*.xcworkspace
+
+# Temporary files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Compiled files
+*.o
+*.out
+*.dSYM/
+
+# Archive files
+*.xcarchive
+
+# SwiftPM dependency cache
+.swiftpm/
