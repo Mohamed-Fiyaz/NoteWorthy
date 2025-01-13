@@ -9,7 +9,10 @@ import SwiftUI
 import FirebaseAuth
 
 struct HomeView: View {
+    @StateObject private var noteService = NoteService()
     @State private var userName: String = ""
+    
+    private let sections = ["Favorites", "Your Notes"]
     
     func fetchUserName() {
         if let user = Auth.auth().currentUser {
@@ -18,25 +21,34 @@ struct HomeView: View {
     }
     
     var body: some View {
-        VStack {
-            HStack {
-                Text("Hi, \(userName)")
-                    .font(.system(size: 24, weight: .regular, design: .default))
-                    .onAppear {
-                        fetchUserName()
-                    }
-                    .padding(.leading)
-                Spacer()
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                // Header
+                UserGreetingView(userName: userName)
+                
+                // Sections
+                ForEach(sections, id: \.self) { section in
+                    NoteSectionView(
+                        section: section,
+                        notes: notesFor(section),
+                        noteService: noteService
+                    )
+                }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.top)
-
-            Spacer()
+            .padding(.vertical)
+        }
+        .onAppear {
+            fetchUserName()
+            noteService.fetchNotes()
+        }
+    }
+    
+    private func notesFor(_ section: String) -> [Note] {
+        switch section {
+        case "Favorites":
+            return noteService.notes.filter { $0.isFavorite }
+        default:
+            return noteService.notes
         }
     }
 }
-
-#Preview {
-    HomeView()
-}
-
