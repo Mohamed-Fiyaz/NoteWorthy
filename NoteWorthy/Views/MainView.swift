@@ -23,9 +23,8 @@ struct MainView: View {
 
     var body: some View {
         ZStack {
-            // Blue background that stays at the top and bottom
             Color(#colorLiteral(red: 0.553298533, green: 0.7063716054, blue: 0.8822532296, alpha: 1))
-                .edgesIgnoringSafeArea(.top) // Make sure it covers the top
+                .edgesIgnoringSafeArea(.top)
 
             VStack(spacing: 0) {
                 HStack {
@@ -40,9 +39,8 @@ struct MainView: View {
                 .padding(.horizontal)
                 .padding(.bottom)
                 .frame(maxWidth: .infinity)
-                .background(Color(#colorLiteral(red: 0.553298533, green: 0.7063716054, blue: 0.8822532296, alpha: 1))) // Blue background for top part
+                .background(Color(#colorLiteral(red: 0.553298533, green: 0.7063716054, blue: 0.8822532296, alpha: 1)))
 
-                // TabView without the blue background around it
                 TabView {
                     NavigationView {
                         HomeView()
