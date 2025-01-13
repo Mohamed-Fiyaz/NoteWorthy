@@ -23,10 +23,12 @@ struct NoteRow: View {
             }
             
             Spacer()
-            Button(action: { noteService.toggleFavorite(note) }) {
-                Image(systemName: note.isFavorite ? "star.fill" : "star")
-                    .foregroundColor(note.isFavorite ? .yellow : .gray)
-            }
+            
+            Image(systemName: note.isFavorite ? "star.fill" : "star")
+                .foregroundColor(note.isFavorite ? .yellow : .gray)
+                .onTapGesture {
+                    noteService.toggleFavorite(note)
+                }
         }
         .padding(.vertical, 8)
     }

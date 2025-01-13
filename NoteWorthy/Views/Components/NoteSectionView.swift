@@ -25,6 +25,12 @@ struct NoteSectionView: View {
                             .foregroundColor(.gray)
                             .font(.subheadline)
                             .padding(.leading)
+                    }
+                    if notes.isEmpty && section == "Your Notes" {
+                        Text("No Notes")
+                            .foregroundColor(.gray)
+                            .font(.subheadline)
+                            .padding(.leading)
                     } else {
                         ForEach(notes.prefix(5)) { note in
                             NavigationLink(
@@ -39,7 +45,13 @@ struct NoteSectionView: View {
                             }
                         }
                         if notes.count > 5 {
-                            NavigationLink(destination: NotesView()) {
+                            NavigationLink(
+                                destination: FilteredNotesView(
+                                    noteService: noteService,
+                                    showFavoritesOnly: section == "Favorites",
+                                    title: section
+                                )
+                            ) {
                                 Text("More")
                                     .foregroundColor(Color(hex: "#8DB4E1"))
                             }

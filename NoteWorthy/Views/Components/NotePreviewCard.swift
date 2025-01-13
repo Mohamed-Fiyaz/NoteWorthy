@@ -38,13 +38,14 @@ struct NotePreviewCard: View {
             .shadow(radius: 2)
             
             if showStar {
-                Button(action: { noteService.toggleFavorite(note) }) {
-                    Image(systemName: note.isFavorite ? "star.fill" : "star")
-                        .foregroundColor(note.isFavorite ? .yellow : .gray)
-                }
-                .padding(8)
+                // Update star button to use local state
+                Image(systemName: note.isFavorite ? "star.fill" : "star")
+                    .foregroundColor(note.isFavorite ? .yellow : .gray)
+                    .padding(8)
+                    .onTapGesture {
+                        noteService.toggleFavorite(note)
+                    }
             }
         }
     }
 }
-
