@@ -19,5 +19,13 @@
     </array>
     <key>GIDClientID</key>
     <string>$(GIDClientID)</string>
+    <key>GEMINI_API_KEY</key>
+    <string>$(GEMINI_API_KEY)</string>
+    <key>NSCameraUsageDescription</key>
+    <string>We need camera access to scan documents</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>We need photo library access to upload documents</string>
+    <key>NSCameraUsageDescription</key>
+    <string>We need camera access to scan documents</string>
 </dict>
 </plist>

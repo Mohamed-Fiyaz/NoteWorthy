@@ -20,7 +20,8 @@ struct MainView: View {
         UITabBar.appearance().standardAppearance = appearance
         UITabBar.appearance().scrollEdgeAppearance = appearance
     }
-
+    @StateObject private var noteService = NoteService()
+    
     var body: some View {
         ZStack {
             Color(#colorLiteral(red: 0.553298533, green: 0.7063716054, blue: 0.8822532296, alpha: 1))
@@ -58,16 +59,10 @@ struct MainView: View {
 
                     NavigationView {
                         IrisView()
+                            .environmentObject(noteService)
                     }
                     .tabItem {
                         Label("Iris", systemImage: "eye.fill")
-                    }
-
-                    NavigationView {
-                        GroupsView()
-                    }
-                    .tabItem {
-                        Label("Group", systemImage: "person.3.fill")
                     }
 
                     NavigationView {
@@ -79,6 +74,8 @@ struct MainView: View {
                 }
                 .accentColor(.white)
                 .background(Color.white)
+                .environmentObject(noteService)
+
             }
         }
     }

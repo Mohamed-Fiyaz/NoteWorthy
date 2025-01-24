@@ -6,71 +6,58 @@
 //
 
 import SwiftUI
+import UIKit
 
+// Views/IrisView.swift
 struct IrisView: View {
+    @StateObject private var viewModel = IrisViewModel()
+    @State private var showingDocumentPicker = false
+    @State private var showingImagePicker = false
+    @State private var selectedNote: Note?
+    @State private var processingDocument = false
+    @EnvironmentObject private var noteService: NoteService  // Add this line
+    
     var body: some View {
-        VStack(spacing: 10) {
-            
-                Image(systemName: "eye.fill")
-                    .font(.system(size: 34))
-                    .padding(.top, 100)
-                Text("Iris")
-                    .font(.custom("JetBrainsMono-Regular", size: 34))
-            
-            Text("Make your studying more efficient\nwith Iris")
-                .font(.custom("JetBrainsMono-Regular", size: 24))
-                .multilineTextAlignment(.center)
-                .padding(.top, 30)
-            
+        ScrollView {
             VStack(spacing: 20) {
-                Button(action: {}) {
-                    HStack {
-                        Image(systemName: "doc.text")
-                            .foregroundColor(.primary)
-                        Text("Summarize")
-                            .foregroundColor(.primary)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color(UIColor.systemBackground))
-                    .cornerRadius(10)
+                HeaderView()
+                
+                // Action Buttons
+                ActionButtonsView(
+                    showingDocumentPicker: $showingDocumentPicker,
+                    showingImagePicker: $showingImagePicker,
+                    selectedNote: $selectedNote,
+                    viewModel: viewModel
+                )
+                .environmentObject(noteService)  // Add this line
+                
+                // Results Section
+                if let analysis = viewModel.currentAnalysis {
+                    AnalysisResultView(analysis: analysis)
                 }
                 
-                Button(action: {}) {
-                    HStack {
-                        Image(systemName: "lightbulb")
-                            .foregroundColor(.primary)
-                        Text("Practice")
-                            .foregroundColor(.primary)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color(UIColor.systemBackground))
-                    .cornerRadius(10)
+                // Processing Indicator
+                if processingDocument {
+                    ProgressView("Processing document...")
                 }
-
-                Button(action: {}) {
-                    HStack {
-                        Image(systemName: "doc.badge.plus")
-                            .foregroundColor(.primary)
-                        Text("Upload")
-                            .foregroundColor(.primary)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color(UIColor.systemBackground))
-                    .cornerRadius(10)
-                }
-
             }
-            .padding(.horizontal, 40)
-            .padding(.top, 50)
-            
-            Spacer()
+            .padding()
+        }
+        .sheet(isPresented: $showingDocumentPicker) {
+            DocumentPicker(viewModel: viewModel)
+        }
+        .sheet(isPresented: $showingImagePicker) {
+            ImagePicker(viewModel: viewModel)
+        }
+        .sheet(item: $selectedNote) { note in
+            NoteSummaryView(note: note, viewModel: viewModel)
+        }
+        .alert("Error", isPresented: $viewModel.showError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(viewModel.errorMessage)
         }
     }
 }
 
-#Preview {
-    IrisView()
-}
+// Also update MainView.swift to ensure NoteService is passed to IrisView
