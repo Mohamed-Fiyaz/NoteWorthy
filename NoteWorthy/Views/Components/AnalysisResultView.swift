@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+
 struct AnalysisResultView: View {
     let analysis: DocumentAnalysis
     
@@ -14,21 +15,45 @@ struct AnalysisResultView: View {
         VStack(alignment: .leading, spacing: 20) {
             SectionView(title: "Summary", content: analysis.summary)
             
-            SectionView(title: "Main Topics") {
-                ForEach(analysis.mainTopics, id: \.self) { topic in
-                    Text("• \(topic)")
-                }
-            }
+            SectionWithConditionalContent(
+                title: "Main Topics",
+                items: analysis.mainTopics,
+                emptyReason: "Not enough context to extract main topics."
+            )
             
-            SectionView(title: "Key Concepts") {
-                ForEach(analysis.keyConcepts, id: \.self) { concept in
-                    Text("• \(concept)")
-                }
-            }
+            SectionWithConditionalContent(
+                title: "Key Concepts",
+                items: analysis.keyConcepts,
+                emptyReason: "Unable to identify key concepts from the text."
+            )
             
-            SectionView(title: "Important Points") {
-                ForEach(analysis.importantPoints, id: \.self) { point in
-                    Text("• \(point)")
+            SectionWithConditionalContent(
+                title: "Important Points",
+                items: analysis.importantPoints,
+                emptyReason: "The document might be too short or lack sufficient detail."
+            )
+        }
+    }
+}
+
+struct SectionWithConditionalContent: View {
+    let title: String
+    let items: [String]
+    let emptyReason: String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.headline)
+            
+            if items.isEmpty {
+                Text(emptyReason)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .italic()
+            } else {
+                ForEach(items, id: \.self) { item in
+                    Text("• \(item)")
                 }
             }
         }
