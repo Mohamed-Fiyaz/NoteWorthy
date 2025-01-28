@@ -59,8 +59,10 @@ class IrisViewModel: ObservableObject {
         do {
             let text = try await documentProcessor.extractTextFromImage(image)
             let parsedAnalysis = try await geminiService.analyzeDocument(text)
-            currentAnalysis = parsedAnalysis
-            isProcessing = false
+            await MainActor.run {
+                currentAnalysis = parsedAnalysis
+                isProcessing = false
+            }
         } catch {
             handleError(error)
         }
@@ -73,3 +75,4 @@ class IrisViewModel: ObservableObject {
         print("Error details: \(error)")
     }
 }
+

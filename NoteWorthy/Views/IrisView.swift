@@ -13,7 +13,7 @@ struct IrisView: View {
     @State private var showingDocumentPicker = false
     @State private var showingImagePicker = false
     @State private var selectedNote: Note?
-    @State private var processingDocument = false
+    @State private var showingDocumentProcessing = false
     @EnvironmentObject private var noteService: NoteService
     
     var body: some View {
@@ -21,7 +21,6 @@ struct IrisView: View {
             VStack(spacing: 20) {
                 HeaderView()
                 
-                // Action Buttons
                 ActionButtonsView(
                     showingDocumentPicker: $showingDocumentPicker,
                     showingImagePicker: $showingImagePicker,
@@ -29,27 +28,30 @@ struct IrisView: View {
                     viewModel: viewModel
                 )
                 .environmentObject(noteService)
-                
-                // Results Section
-                if let analysis = viewModel.currentAnalysis {
-                    AnalysisResultView(analysis: analysis)
-                }
-                
-                // Processing Indicator
-                if processingDocument {
-                    ProgressView("Processing document...")
-                }
             }
             .padding()
         }
         .sheet(isPresented: $showingDocumentPicker) {
             DocumentPicker(viewModel: viewModel)
+                .onDisappear {
+                    if viewModel.currentAnalysis != nil {
+                        showingDocumentProcessing = true
+                    }
+                }
         }
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(viewModel: viewModel)
+                .onDisappear {
+                    if viewModel.currentAnalysis != nil {
+                        showingDocumentProcessing = true
+                    }
+                }
         }
         .sheet(item: $selectedNote) { note in
             NoteSummaryView(note: note, viewModel: viewModel)
+        }
+        .sheet(isPresented: $showingDocumentProcessing) {
+            DocumentProcessingView(viewModel: viewModel)
         }
         .alert("Error", isPresented: $viewModel.showError) {
             Button("OK", role: .cancel) { }
@@ -58,4 +60,3 @@ struct IrisView: View {
         }
     }
 }
-

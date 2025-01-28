@@ -10,8 +10,12 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct DocumentPicker: UIViewControllerRepresentable {
-    @ObservedObject var viewModel: IrisViewModel
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject var viewModel: IrisViewModel
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
     
     func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
         let supportedTypes: [UTType] = [UTType.pdf]
@@ -22,10 +26,6 @@ struct DocumentPicker: UIViewControllerRepresentable {
     }
     
     func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {}
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
     
     class Coordinator: NSObject, UIDocumentPickerDelegate {
         let parent: DocumentPicker
