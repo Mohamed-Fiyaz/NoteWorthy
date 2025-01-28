@@ -8,14 +8,13 @@
 import SwiftUI
 import UIKit
 
-// Views/IrisView.swift
 struct IrisView: View {
     @StateObject private var viewModel = IrisViewModel()
     @State private var showingDocumentPicker = false
     @State private var showingImagePicker = false
     @State private var selectedNote: Note?
     @State private var processingDocument = false
-    @EnvironmentObject private var noteService: NoteService  // Add this line
+    @EnvironmentObject private var noteService: NoteService
     
     var body: some View {
         ScrollView {
@@ -29,7 +28,7 @@ struct IrisView: View {
                     selectedNote: $selectedNote,
                     viewModel: viewModel
                 )
-                .environmentObject(noteService)  // Add this line
+                .environmentObject(noteService) 
                 
                 // Results Section
                 if let analysis = viewModel.currentAnalysis {
@@ -60,4 +59,3 @@ struct IrisView: View {
     }
 }
 
-// Also update MainView.swift to ensure NoteService is passed to IrisView

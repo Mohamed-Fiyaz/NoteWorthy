@@ -27,5 +27,7 @@
     <string>We need photo library access to upload documents</string>
     <key>NSCameraUsageDescription</key>
     <string>We need camera access to scan documents</string>
+    <key>UIUserInterfaceStyle</key>
+    <string>Light</string>
 </dict>
 </plist>

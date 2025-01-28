@@ -5,6 +5,13 @@
 //  Created by Mohamed Fiyaz on 22/01/25.
 //
 
+//
+//  NotesSummaryView.swift
+//  NoteWorthy
+//
+//  Created by Mohamed Fiyaz on 22/01/25.
+//
+
 import Foundation
 import SwiftUI
 import PDFKit
@@ -17,48 +24,63 @@ struct NoteSummaryView: View {
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    Text("Original Note")
-                        .font(.headline)
-                    Text(note.content)
-                        .padding()
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(10)
-                    
-                    if viewModel.isProcessing {
-                        LoadingAnimationView()
-                    } else if let analysis = viewModel.currentAnalysis {
-                        AnalysisResultView(analysis: analysis)
+            ScrollViewReader { scrollProxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+                        
+                        // Loading animation at the top
+                        if viewModel.isProcessing {
+                            LoadingAnimationView()
+                        }
+                        
+                        // Original Note section
+                        Text("Original Note")
+                            .font(.headline)
+                        Text(note.content)
+                            .padding()
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(10)
+                        
+                        // Analysis results
+                        if let analysis = viewModel.currentAnalysis {
+                            AnalysisResultView(analysis: analysis)
+                                .id("bottom") // ID for automatic scrolling
+                        }
                     }
-                }
-                .padding()
-            }
-            .navigationTitle(note.title)
-            .navigationBarItems(
-                trailing: Group {
-                    if !viewModel.isProcessing {
-                        HStack {
-                            if let analysis = viewModel.currentAnalysis {
-                                Button(action: downloadPDF) {
-                                    Image(systemName: "square.and.arrow.down")
-                                }
-                            }
-                            
-                            Button("Done") {
-                                dismiss()
-                            }
+                    .padding()
+                    .onChange(of: viewModel.currentAnalysis) { _ in
+                        // Automatically scroll to the bottom when analysis is complete
+                        withAnimation {
+                            scrollProxy.scrollTo("bottom", anchor: .bottom)
                         }
                     }
                 }
-            )
-            .task {
-                await viewModel.processNote(note)
-            }
-            .alert(isPresented: $isDownloadingPDF) {
-                Alert(title: Text("PDF Downloaded"),
-                      message: Text("The analysis has been saved to your device."),
-                      dismissButton: .default(Text("OK")))
+                .navigationTitle(note.title)
+                .navigationBarItems(
+                    trailing: Group {
+                        if !viewModel.isProcessing {
+                            HStack {
+                                if let analysis = viewModel.currentAnalysis {
+                                    Button(action: downloadPDF) {
+                                        Image(systemName: "square.and.arrow.down")
+                                    }
+                                }
+                                
+                                Button("Done") {
+                                    dismiss()
+                                }
+                            }
+                        }
+                    }
+                )
+                .task {
+                    await viewModel.processNote(note)
+                }
+                .alert(isPresented: $isDownloadingPDF) {
+                    Alert(title: Text("PDF Downloaded"),
+                          message: Text("The analysis has been saved to your device."),
+                          dismissButton: .default(Text("OK")))
+                }
             }
         }
     }

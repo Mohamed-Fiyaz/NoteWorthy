@@ -6,7 +6,7 @@
 //
 
 import Foundation
-struct DocumentAnalysis: Codable {
+struct DocumentAnalysis: Codable, Equatable {
     let mainTopics: [String]
     let keyConcepts: [String]
     let summary: String
