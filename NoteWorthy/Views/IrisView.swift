@@ -28,7 +28,7 @@ struct IrisView: View {
                     selectedNote: $selectedNote,
                     viewModel: viewModel
                 )
-                .environmentObject(noteService) 
+                .environmentObject(noteService)
                 
                 // Results Section
                 if let analysis = viewModel.currentAnalysis {
