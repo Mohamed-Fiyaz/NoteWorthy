@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 import SwiftUI
 
+@MainActor
 class IrisViewModel: ObservableObject {
     private let geminiService: GeminiService
     private let documentProcessor: DocumentProcessingService
@@ -26,17 +27,14 @@ class IrisViewModel: ObservableObject {
         self.geminiService = GeminiService(apiKey: apiKey)
         self.documentProcessor = DocumentProcessingService()
     }
-
     
     func processNote(_ note: Note) async {
         isProcessing = true
+        
         do {
             let parsedAnalysis = try await geminiService.analyzeDocument(note.content)
-            
-            DispatchQueue.main.async {
-                self.currentAnalysis = parsedAnalysis
-                self.isProcessing = false
-            }
+            currentAnalysis = parsedAnalysis
+            isProcessing = false
         } catch {
             handleError(error)
         }
@@ -44,14 +42,12 @@ class IrisViewModel: ObservableObject {
     
     func processPDF(_ url: URL) async {
         isProcessing = true
+        
         do {
             let text = try documentProcessor.extractTextFromPDF(url)
             let parsedAnalysis = try await geminiService.analyzeDocument(text)
-            
-            DispatchQueue.main.async {
-                self.currentAnalysis = parsedAnalysis
-                self.isProcessing = false
-            }
+            currentAnalysis = parsedAnalysis
+            isProcessing = false
         } catch {
             handleError(error)
         }
@@ -59,25 +55,21 @@ class IrisViewModel: ObservableObject {
     
     func processImage(_ image: UIImage) async {
         isProcessing = true
+        
         do {
             let text = try await documentProcessor.extractTextFromImage(image)
             let parsedAnalysis = try await geminiService.analyzeDocument(text)
-            
-            DispatchQueue.main.async {
-                self.currentAnalysis = parsedAnalysis
-                self.isProcessing = false
-            }
+            currentAnalysis = parsedAnalysis
+            isProcessing = false
         } catch {
             handleError(error)
         }
     }
     
     private func handleError(_ error: Error) {
-        DispatchQueue.main.async {
-            self.errorMessage = "Analysis failed: \(error.localizedDescription)"
-            self.showError = true
-            self.isProcessing = false
-            print("Error details: \(error)")
-        }
+        errorMessage = "Analysis failed: \(error.localizedDescription)"
+        showError = true
+        isProcessing = false
+        print("Error details: \(error)")
     }
 }
