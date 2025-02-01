@@ -20,10 +20,6 @@ struct DocumentProcessingView: View {
             ScrollViewReader { scrollProxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
-                        if viewModel.isProcessing {
-                            LoadingAnimationView()
-                        }
-                        
                         if let analysis = viewModel.currentAnalysis {
                             AnalysisResultView(analysis: analysis)
                                 .id("bottom")
@@ -39,7 +35,7 @@ struct DocumentProcessingView: View {
                 .navigationTitle("Document Analysis")
                 .navigationBarItems(
                     trailing: Group {
-                        if !viewModel.isProcessing, let analysis = viewModel.currentAnalysis {
+                        if let analysis = viewModel.currentAnalysis {
                             HStack {
                                 Button(action: {
                                     saveAsNote(analysis: analysis)
@@ -48,6 +44,7 @@ struct DocumentProcessingView: View {
                                 }
                                 
                                 Button("Done") {
+                                    viewModel.clearAnalysis() // Clear the analysis
                                     dismiss()
                                 }
                             }

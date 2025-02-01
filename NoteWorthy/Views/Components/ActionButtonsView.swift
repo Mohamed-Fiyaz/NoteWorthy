@@ -7,11 +7,13 @@
 
 import Foundation
 import SwiftUI
+
 struct ActionButtonsView: View {
     @Binding var showingDocumentPicker: Bool
     @Binding var showingImagePicker: Bool
     @Binding var selectedNote: Note?
     @ObservedObject var viewModel: IrisViewModel
+    @Binding var showLoadingPopup: Bool
     @EnvironmentObject var noteService: NoteService
     @State private var showingNoteSelector = false
     @State private var showingCameraSheet = false
@@ -21,24 +23,36 @@ struct ActionButtonsView: View {
             CustomButton(
                 icon: "doc.text",
                 title: "Summarize Note",
-                action: { showingNoteSelector = true }
+                action: {
+                    viewModel.clearAnalysis() // Clear previous analysis
+                    showingNoteSelector = true
+                }
             )
             
             CustomButton(
                 icon: "camera",
                 title: "Scan Document",
-                action: { showingCameraSheet = true }
+                action: {
+                    viewModel.clearAnalysis() // Clear previous analysis
+                    showingCameraSheet = true
+                }
             )
             
             CustomButton(
                 icon: "doc.badge.plus",
                 title: "Upload PDF",
-                action: { showingDocumentPicker = true }
+                action: {
+                    viewModel.clearAnalysis() // Clear previous analysis
+                    showingDocumentPicker = true
+                }
             )
         }
         .sheet(isPresented: $showingNoteSelector) {
             NoteSelectionView { note in
                 selectedNote = note
+                Task {
+                    await viewModel.processNote(note)
+                }
             }
         }
         .sheet(isPresented: $showingCameraSheet) {

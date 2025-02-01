@@ -14,6 +14,7 @@ struct IrisView: View {
     @State private var showingImagePicker = false
     @State private var selectedNote: Note?
     @State private var showingDocumentProcessing = false
+    @State private var showLoadingPopup = false
     @EnvironmentObject private var noteService: NoteService
     
     var body: some View {
@@ -25,7 +26,8 @@ struct IrisView: View {
                     showingDocumentPicker: $showingDocumentPicker,
                     showingImagePicker: $showingImagePicker,
                     selectedNote: $selectedNote,
-                    viewModel: viewModel
+                    viewModel: viewModel,
+                    showLoadingPopup: $showLoadingPopup
                 )
                 .environmentObject(noteService)
             }
@@ -57,6 +59,21 @@ struct IrisView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text(viewModel.errorMessage)
+        }
+        .overlay(
+            Group {
+                if showLoadingPopup {
+                    LoadingPopupView(isVisible: $showLoadingPopup)
+                }
+            }
+        )
+        .onChange(of: viewModel.isProcessing) { isProcessing in
+            showLoadingPopup = isProcessing
+        }
+        .onChange(of: viewModel.currentAnalysis) { newValue in
+            if newValue != nil {
+                showingDocumentProcessing = true
+            }
         }
     }
 }
