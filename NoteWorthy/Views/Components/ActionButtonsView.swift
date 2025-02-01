@@ -50,9 +50,6 @@ struct ActionButtonsView: View {
         .sheet(isPresented: $showingNoteSelector) {
             NoteSelectionView { note in
                 selectedNote = note
-                Task {
-                    await viewModel.processNote(note)
-                }
             }
         }
         .sheet(isPresented: $showingCameraSheet) {
