@@ -42,7 +42,7 @@ struct IrisView: View {
                 }
         }
         .sheet(isPresented: $showingImagePicker) {
-            ImagePicker(viewModel: viewModel)
+            ImagePickerView(viewModel: viewModel)
                 .onDisappear {
                     if viewModel.currentAnalysis != nil {
                         showingDocumentProcessing = true

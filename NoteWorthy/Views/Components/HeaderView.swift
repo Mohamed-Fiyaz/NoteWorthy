@@ -10,6 +10,7 @@ import SwiftUI
 struct HeaderView: View {
     var body: some View {
         VStack(spacing: 10) {
+            Spacer()
             Image(systemName: "eye.fill")
                 .font(.system(size: 34))
             

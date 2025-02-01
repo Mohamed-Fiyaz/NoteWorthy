@@ -13,7 +13,7 @@ struct AnalysisResultView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            SectionView(title: "Summary", content: analysis.summary)
+            SectionViewAnalysis(title: "Summary", content: analysis.summary)
             
             SectionWithConditionalContent(
                 title: "Main Topics",

@@ -7,36 +7,37 @@
 
 import SwiftUI
 import FirebaseAuth
+import FirebaseFirestore
 
 struct ContentView: View {
     @State private var currentScreen: AppScreen = .launchScreen
     @StateObject private var model = Model()
     @StateObject private var appState = AppState()
     @State private var showMainView = false
-    
+    @State private var notes: [String] = []
+
     enum AppScreen {
         case launchScreen
         case mainView
         case logInView
     }
-    
+
     var body: some View {
         ZStack {
             NavigationStack(path: $appState.routes) {
                 ZStack {
                     MainView()
                         .opacity(currentScreen == .mainView ? 1 : 0)
-                    
+
                     LogInView()
                         .opacity(currentScreen == .logInView ? 1 : 0)
-                    
-                } .navigationDestination(for: Route.self) { route in
+                }
+                .navigationDestination(for: Route.self) { route in
                     destinationView(for: route)
                 }
-                
             }
             .opacity(showMainView ? 1 : 0)
-            
+
             if !showMainView {
                 LaunchScreenView()
                     .transition(.opacity)
@@ -48,13 +49,9 @@ struct ContentView: View {
                 withAnimation {
                     if let currentUser = Auth.auth().currentUser {
                         if currentUser.isEmailVerified {
-//                            do {
-//                                try Auth.auth().signOut()
-//                            } catch {
-//                                print(error.localizedDescription)
-//                            }
                             currentScreen = .mainView
                             appState.routes = [.main]
+                            fetchNotes(for: currentUser.uid) // Fetch notes
                         } else {
                             currentScreen = .logInView
                             appState.routes = [.login]
@@ -63,7 +60,7 @@ struct ContentView: View {
                         currentScreen = .logInView
                         appState.routes = [.login]
                     }
-                    
+
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         showMainView = true
                     }
@@ -73,7 +70,7 @@ struct ContentView: View {
         .environmentObject(model)
         .environmentObject(appState)
     }
-    
+
     @ViewBuilder
     private func destinationView(for route: Route) -> some View {
         switch route {
@@ -87,6 +84,23 @@ struct ContentView: View {
             SignUpView()
                 .navigationBarBackButtonHidden(true)
         }
+    }
+
+    // Fetch real-time Firestore updates
+    private func fetchNotes(for userId: String) {
+        let db = Firestore.firestore()
+        
+        db.collection("notes")
+            .whereField("userId", isEqualTo: userId)
+            .addSnapshotListener { snapshot, error in
+                guard let documents = snapshot?.documents, error == nil else {
+                    print("Error fetching notes: \(error?.localizedDescription ?? "Unknown error")")
+                    return
+                }
+
+                self.notes = documents.compactMap { $0["content"] as? String }
+                print("Notes updated:", self.notes)
+            }
     }
 }
 

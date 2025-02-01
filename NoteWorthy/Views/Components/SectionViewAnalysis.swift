@@ -7,7 +7,7 @@
 
 import Foundation
 import SwiftUI
-struct SectionView<Content: View>: View {
+struct SectionViewAnalysis<Content: View>: View {
     let title: String
     let content: Content
     
