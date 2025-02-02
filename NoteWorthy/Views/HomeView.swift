@@ -23,10 +23,8 @@ struct HomeView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                // Header
                 UserGreetingView(userName: userName)
                 
-                // Sections
                 ForEach(sections, id: \.self) { section in
                     NoteSectionView(
                         section: section,

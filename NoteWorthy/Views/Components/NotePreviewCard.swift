@@ -20,15 +20,15 @@ struct NotePreviewCard: View {
                 
                 Text(note.title)
                     .foregroundColor(.black)
-                    .font(.headline) // Keep the font size as before
+                    .font(.headline)
                     .fontWeight(.medium)
-                    .multilineTextAlignment(.center) // Center-align title
+                    .multilineTextAlignment(.center)
                     .lineLimit(1)
                 
                 if !isCompact {
                     Text(note.content)
                         .foregroundColor(.gray)
-                        .font(.subheadline) // Keep content font size consistent
+                        .font(.subheadline)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
                 }
@@ -36,7 +36,7 @@ struct NotePreviewCard: View {
                 Spacer()
             }
             .padding()
-            .frame(width: isCompact ? 140 : 200, height: isCompact ? 100 : 130) // Reduced rectangle size
+            .frame(width: isCompact ? 140 : 200, height: isCompact ? 100 : 130)
             .background(Color(hex: note.colorHex))
             .cornerRadius(12)
             .shadow(radius: 2)

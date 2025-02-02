@@ -34,21 +34,18 @@ struct DocumentProcessingView: View {
                 }
                 .navigationTitle("Document Analysis")
                 .navigationBarItems(
-                    trailing: Group {
+                    leading: Group {
                         if let analysis = viewModel.currentAnalysis {
-                            HStack {
-                                Button(action: {
-                                    saveAsNote(analysis: analysis)
-                                }) {
-                                    Image(systemName: "square.and.arrow.down")
-                                }
-                                
-                                Button("Done") {
-                                    viewModel.clearAnalysis() // Clear the analysis
-                                    dismiss()
-                                }
+                            Button(action: {
+                                saveAsNote(analysis: analysis)
+                            }) {
+                                Text("Save As Note")
                             }
                         }
+                    },
+                    trailing: Button("Done") {
+                        viewModel.clearAnalysis()
+                        dismiss()
                     }
                 )
             }

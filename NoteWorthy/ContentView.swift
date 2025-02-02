@@ -86,7 +86,6 @@ struct ContentView: View {
         }
     }
 
-    // Fetch real-time Firestore updates
     private func fetchNotes(for userId: String) {
         let db = Firestore.firestore()
         

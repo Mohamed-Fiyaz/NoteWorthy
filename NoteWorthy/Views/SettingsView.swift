@@ -24,9 +24,7 @@ struct SettingsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                // Profile Section
                 VStack(spacing: 20) {
-                    // Profile Image with Edit Icon
                     ZStack(alignment: .bottomTrailing) {
                         Button(action: {
                             showingImagePicker = true
@@ -54,7 +52,6 @@ struct SettingsView: View {
                             .offset(x: -3, y: -3)
                     }
                     
-                    // User Name and Email
                     VStack(spacing: 5) {
                         Text(userName)
                             .font(.title2)
@@ -67,7 +64,6 @@ struct SettingsView: View {
                 }
                 .padding(.vertical, 30)
                 
-                // Account Section
                 SectionView(title: "Account") {
                     SettingsRow(icon: "square.and.pencil", title: "Edit profile") {
                         showingEditNameSheet = true
@@ -113,7 +109,6 @@ struct SettingsView: View {
         userEmail = user.email ?? ""
         userName = user.displayName ?? "User"
         
-        // Load profile image
         let storageRef = Storage.storage().reference()
         let imageRef = storageRef.child("profile_images/\(user.uid).jpg")
         
@@ -133,13 +128,11 @@ struct SettingsView: View {
         let storageRef = Storage.storage().reference()
         let imageRef = storageRef.child("profile_images/\(user.uid).jpg")
         
-        // Delete old profile image before uploading a new one
         imageRef.delete { error in
             if let error = error {
                 print("Failed to delete old profile image: \(error.localizedDescription)")
             }
             
-            // Upload new profile image
             guard let imageData = image.jpegData(compressionQuality: 0.5) else {
                 isLoading = false
                 return

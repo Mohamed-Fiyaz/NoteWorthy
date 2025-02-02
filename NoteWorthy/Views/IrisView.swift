@@ -71,7 +71,6 @@ struct IrisView: View {
             showLoadingPopup = isProcessing
         }
         .onChange(of: viewModel.currentAnalysis) { newValue in
-            // Only show document processing for non-note analysis
             if newValue != nil && selectedNote == nil {
                 showingDocumentProcessing = true
             }

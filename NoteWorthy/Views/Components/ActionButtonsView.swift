@@ -24,7 +24,7 @@ struct ActionButtonsView: View {
                 icon: "doc.text",
                 title: "Summarize Note",
                 action: {
-                    viewModel.clearAnalysis() // Clear previous analysis
+                    viewModel.clearAnalysis()
                     showingNoteSelector = true
                 }
             )
@@ -33,7 +33,7 @@ struct ActionButtonsView: View {
                 icon: "camera",
                 title: "Scan Document",
                 action: {
-                    viewModel.clearAnalysis() // Clear previous analysis
+                    viewModel.clearAnalysis()
                     showingCameraSheet = true
                 }
             )
@@ -42,7 +42,7 @@ struct ActionButtonsView: View {
                 icon: "doc.badge.plus",
                 title: "Upload PDF",
                 action: {
-                    viewModel.clearAnalysis() // Clear previous analysis
+                    viewModel.clearAnalysis()
                     showingDocumentPicker = true
                 }
             )

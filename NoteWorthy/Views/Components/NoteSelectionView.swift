@@ -49,10 +49,8 @@ struct NoteSelectionView: View {
             .navigationBarItems(trailing: Button("Cancel") { dismiss() })
         }
         .onAppear {
-            // Ensure notes are fetched
             noteService.fetchNotes()
             
-            // Use a slight delay to allow notes to load
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 isLoading = false
             }

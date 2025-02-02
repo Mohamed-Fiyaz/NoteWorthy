@@ -12,14 +12,12 @@ struct LoadingPopupView: View {
     
     var body: some View {
         ZStack {
-            // White blur background
             VisualEffectView(effect: UIBlurEffect(style: .light))
                 .edgesIgnoringSafeArea(.all)
             
-            // Loading animation and text
             VStack(spacing: 20) {
                 Spacer()
-                LoadingAnimationView() // Use the provided LoadingAnimationView
+                LoadingAnimationView()
                 Spacer()
             }
             .padding(30)
@@ -27,11 +25,10 @@ struct LoadingPopupView: View {
             .cornerRadius(15)
             .shadow(radius: 10)
         }
-        .opacity(isVisible ? 1 : 0) // Show/hide based on isVisible
+        .opacity(isVisible ? 1 : 0)
     }
 }
 
-// Helper view for blur effect
 struct VisualEffectView: UIViewRepresentable {
     var effect: UIVisualEffect?
     

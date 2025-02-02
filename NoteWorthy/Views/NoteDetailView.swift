@@ -72,14 +72,6 @@ struct NoteDetailView: View {
             }
             
             Section {
-                Button(action: { noteService.toggleFavorite(note) }) {
-                    HStack {
-                        Image(systemName: note.isFavorite ? "star.fill" : "star")
-                        Text(note.isFavorite ? "Remove from Favorites" : "Add to Favorites")
-                    }
-                    .foregroundColor(note.isFavorite ? .yellow : .gray)
-                }
-                
                 Button(role: .destructive, action: { showingDeleteAlert = true }) {
                     HStack {
                         Image(systemName: "trash")

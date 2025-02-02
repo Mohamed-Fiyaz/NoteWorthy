@@ -112,7 +112,6 @@ struct NoteSummaryView: View {
             let marginBottom: CGFloat = 50
             let contentWidth = pageWidth - (marginX * 2)
             
-            // Helper function to measure content height
             func measureContentHeight(_ content: [String], withAttributes attrs: [NSAttributedString.Key: Any]) -> CGFloat {
                 return content.reduce(0) { totalHeight, item in
                     let itemText = NSAttributedString(string: "• \(item)", attributes: attrs)
@@ -125,12 +124,10 @@ struct NoteSummaryView: View {
                 }
             }
             
-            // Helper function to check if content fits on current page
             func willContentFitOnPage(headerHeight: CGFloat, contentHeight: CGFloat) -> Bool {
                 return (yPosition + headerHeight + contentHeight) <= (pageHeight - marginBottom)
             }
             
-            // Configure text styles
             let titleStyle = NSMutableParagraphStyle()
             titleStyle.alignment = .left
             titleStyle.lineSpacing = 6
@@ -140,7 +137,6 @@ struct NoteSummaryView: View {
             contentStyle.lineSpacing = 6
             contentStyle.paragraphSpacing = 10
             
-            // Text attributes
             let titleAttributes: [NSAttributedString.Key: Any] = [
                 .font: UIFont.boldSystemFont(ofSize: 24),
                 .foregroundColor: UIColor.black,
@@ -159,12 +155,10 @@ struct NoteSummaryView: View {
                 .paragraphStyle: contentStyle
             ]
             
-            // Draw title
             let titleString = NSAttributedString(string: note.title, attributes: titleAttributes)
             titleString.draw(in: CGRect(x: marginX, y: yPosition, width: contentWidth, height: 50))
             yPosition += 60
             
-            // Draw date
             let dateFormatter = DateFormatter()
             dateFormatter.dateStyle = .long
             let dateString = NSAttributedString(
@@ -174,23 +168,19 @@ struct NoteSummaryView: View {
             dateString.draw(in: CGRect(x: marginX, y: yPosition, width: contentWidth, height: 20))
             yPosition += 40
             
-            // Function to draw a section
             func drawSection(title: String, content: [String]) {
                 let headerHeight: CGFloat = 40
                 let contentHeight = measureContentHeight(content, withAttributes: contentAttributes)
                 
-                // Check if header and at least first content item will fit
                 if !willContentFitOnPage(headerHeight: headerHeight, contentHeight: contentHeight) {
                     context.beginPage()
                     yPosition = 50
                 }
                 
-                // Draw section title
                 let sectionTitle = NSAttributedString(string: title, attributes: headingAttributes)
                 sectionTitle.draw(in: CGRect(x: marginX, y: yPosition, width: contentWidth, height: headerHeight))
                 yPosition += headerHeight
                 
-                // Draw section content
                 for (index, item) in content.enumerated() {
                     let itemText = title == "Summary" ? item : "• \(item)"
                     let itemString = NSAttributedString(string: itemText, attributes: contentAttributes)
@@ -201,12 +191,10 @@ struct NoteSummaryView: View {
                         context: nil
                     ).height + 10
                     
-                    // If this item won't fit, start a new page
                     if yPosition + itemHeight > pageHeight - marginBottom {
                         context.beginPage()
                         yPosition = 50
                         
-                        // If this is the first item, redraw the section header
                         if index == 0 {
                             sectionTitle.draw(in: CGRect(x: marginX, y: yPosition, width: contentWidth, height: headerHeight))
                             yPosition += headerHeight
@@ -217,10 +205,9 @@ struct NoteSummaryView: View {
                     yPosition += itemHeight
                 }
                 
-                yPosition += 20 // Add spacing after section
+                yPosition += 20
             }
             
-            // Draw all sections
             drawSection(title: "Summary", content: [analysis.summary])
             drawSection(title: "Main Topics", content: analysis.mainTopics)
             drawSection(title: "Key Concepts", content: analysis.keyConcepts)
