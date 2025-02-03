@@ -68,11 +68,27 @@ struct SettingsView: View {
                     SettingsRow(icon: "square.and.pencil", title: "Edit profile") {
                         showingEditNameSheet = true
                     }
-                    
-                    SettingsRow(icon: "arrow.right.square", title: "Log out", textColor: .red) {
-                        showingLogoutAlert = true
-                    }
+                    .background(Color(red: 0.937, green: 0.965, blue: 0.988))
+
                 }
+                    SectionView(title: "Support and About") {
+                        SettingsRow(icon: "questionmark.circle", title: "Help and Support") {
+                            
+                        }
+                        .background(Color(red: 0.937, green: 0.965, blue: 0.988))
+
+                        SettingsRow(icon: "info.circle", title: "About") {
+                            
+                        }
+                        .background(Color(red: 0.937, green: 0.965, blue: 0.988))
+
+                        SettingsRow(icon: "arrow.right.square", title: "Log out", textColor: .red) {
+                            showingLogoutAlert = true
+                        }
+                        .background(Color(red: 0.937, green: 0.965, blue: 0.988))
+
+                    }
+                    .padding(.top, 10)
             }
             .padding(.horizontal)
         }
