@@ -56,28 +56,34 @@ struct CollectionDetailView: View {
         .navigationBarItems(
             leading: Button("Back") { dismiss() },
             trailing: HStack(spacing: 16) {
-                if !collectionNotes.isEmpty {
-                    Button(editMode.isEditing ? "Done" : "Edit") {
+                if editMode.isEditing {
+                    Button("Done") {
                         withAnimation {
-                            editMode = editMode.isEditing ? .inactive : .active
+                            editMode = .inactive
                         }
                     }
-                }
-                
-                Menu {
-                    if !editMode.isEditing {
+                } else {
+                    Menu {
                         Button(action: { showingAddNote = true }) {
                             Label("Add Notes", systemImage: "plus")
                         }
-                    }
-                    
-                    Button(role: .destructive) {
-                        showingDeleteAlert = true
+                        
+                        Button(action: {
+                            withAnimation {
+                                editMode = .active
+                            }
+                        }) {
+                            Label("Edit Notes", systemImage: "pencil")
+                        }
+                        
+                        Button(role: .destructive) {
+                            showingDeleteAlert = true
+                        } label: {
+                            Label("Delete Collection", systemImage: "trash")
+                        }
                     } label: {
-                        Label("Delete Collection", systemImage: "trash")
+                        Image(systemName: "ellipsis")
                     }
-                } label: {
-                    Image(systemName: "ellipsis")
                 }
             }
         )
@@ -98,9 +104,6 @@ struct CollectionDetailView: View {
             }
         } message: {
             Text("Are you sure you want to delete this collection? This action cannot be undone.")
-        }
-        .onAppear {
-            collectionService.fetchCollections()
         }
     }
 }
