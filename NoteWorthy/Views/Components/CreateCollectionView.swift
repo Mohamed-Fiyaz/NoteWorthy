@@ -14,15 +14,19 @@ struct CreateCollectionView: View {
     @State private var collectionName = ""
     @State private var selectedColor = "#8DB4E1"
     
-    private let colors = [
-        "#8DB4E1", // Blue
-        "#FF9B9B", // Red
-        "#FFB7B7", // Pink
-        "#B1E5F9", // Light Blue
-        "#D3B5E5", // Purple
-        "#FFD93D", // Yellow
-        "#98FF98", // Green
-        "#FFC0CB", // Light Pink
+    let colors = [
+        "#F8F8F8", // Light Gray
+        "#FFFBF2", // Light Cream
+        "#FFE4E1", // Misty Rose
+        "#E6F7FF", // Light Sky Blue
+        "#E5EAF5", // Lavender Blue
+        "#F2F2D9", // Light Pastel Yellow
+        "#DCE9E2", // Mint Green
+        "#EADFF7", // Light Lilac
+        "#D7CCC8", // Light Taupe
+        "#C8E6C9", // Pale Green
+        "#B2DFDB", // Aquamarine
+        "#B3CDE3"  // Dusty Blue
     ]
     
     var body: some View {
@@ -42,7 +46,7 @@ struct CreateCollectionView: View {
                                 .frame(width: 44, height: 44)
                                 .overlay(
                                     Circle()
-                                        .stroke(Color.primary, lineWidth: selectedColor == color ? 2 : 0)
+                                        .stroke(color == selectedColor ? Color.blue : Color.clear, lineWidth: 2)
                                 )
                                 .onTapGesture {
                                     selectedColor = color

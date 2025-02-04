@@ -21,6 +21,7 @@ struct CollectionPreviewCard: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text(collection.name)
+                    .foregroundColor(.black)
                     .font(.headline)
                     .lineLimit(1)
                 
@@ -44,7 +45,7 @@ struct CollectionPreviewCard: View {
         }
         .frame(width: 150, height: 80)
         .padding()
-        .background(Color(hex: collection.color).opacity(0.2))
+        .background(Color(hex: collection.color))
         .cornerRadius(10)
         .shadow(radius: 2)
         .alert("Delete Collection", isPresented: $showingDeleteAlert) {
