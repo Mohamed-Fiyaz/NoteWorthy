@@ -54,7 +54,6 @@ struct CollectionDetailView: View {
         .listStyle(PlainListStyle())
         .navigationTitle(collection.name)
         .navigationBarItems(
-            leading: Button("Back") { dismiss() },
             trailing: HStack(spacing: 16) {
                 if editMode.isEditing {
                     Button("Done") {
