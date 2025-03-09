@@ -12,7 +12,7 @@ class GeminiService {
     private let model: GenerativeModel
     
     init(apiKey: String) {
-        model = GenerativeModel(name: "gemini-pro", apiKey: apiKey)
+        model = GenerativeModel(name: "gemini-1.5-flash", apiKey: apiKey)
     }
     
     func summarizeText(_ text: String) async throws -> String {
