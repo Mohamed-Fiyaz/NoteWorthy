@@ -16,6 +16,7 @@ struct NoteDetailView: View {
     @State private var editedColor: String
     @State private var showingDiscardAlert = false
     @State private var showingDeleteAlert = false
+    @State private var showingQAGeneration = false
     
     let colors = [
         "#F8F8F8", // Light Gray
@@ -72,6 +73,16 @@ struct NoteDetailView: View {
             }
             
             Section {
+                // Q&A Generation Button
+                Button(action: { showingQAGeneration = true }) {
+                    HStack {
+                        Image(systemName: "questionmark.circle")
+                        Text("Generate Q&As")
+                    }
+                    .foregroundColor(Color(#colorLiteral(red: 0.553298533, green: 0.7063716054, blue: 0.8822532296, alpha: 1)))
+                }
+                
+                // Delete Note Button
                 Button(role: .destructive, action: { showingDeleteAlert = true }) {
                     HStack {
                         Image(systemName: "trash")
@@ -110,6 +121,9 @@ struct NoteDetailView: View {
             }
         } message: {
             Text("Are you sure you want to delete this note?")
+        }
+        .sheet(isPresented: $showingQAGeneration) {
+            GenerateQAView(note: note)
         }
     }
     
