@@ -10,7 +10,6 @@ import FirebaseAuth
 
 struct HomeView: View {
     @StateObject private var noteService = NoteService()
-    @StateObject private var collectionService = CollectionService()
     @State private var userName: String = ""
     
     private let sections = ["Favorites", "Your Notes"]
@@ -33,18 +32,12 @@ struct HomeView: View {
                         noteService: noteService
                     )
                 }
-                
-                CollectionSectionView(
-                    noteService: noteService,
-                    collectionService: collectionService
-                )
             }
             .padding(.vertical)
         }
         .onAppear {
             fetchUserName()
             noteService.fetchNotes()
-            collectionService.fetchCollections()
         }
     }
     
