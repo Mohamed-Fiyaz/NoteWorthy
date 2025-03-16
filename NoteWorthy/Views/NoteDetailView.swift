@@ -76,7 +76,7 @@ struct NoteDetailView: View {
                 // Q&A Generation Button
                 Button(action: { showingQAGeneration = true }) {
                     HStack {
-                        Image(systemName: "questionmark.circle")
+                        Image(systemName: "eye")
                         Text("Generate Q&As")
                     }
                     .foregroundColor(Color(#colorLiteral(red: 0.553298533, green: 0.7063716054, blue: 0.8822532296, alpha: 1)))

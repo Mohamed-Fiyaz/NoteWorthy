@@ -195,7 +195,7 @@ struct ChatMessageView: View {
     var body: some View {
         HStack {
             if message.type == .assistant {
-                Image(systemName: "brain")
+                Image(systemName: "eye")
                     .foregroundColor(.white)
                     .padding(8)
                     .background(Color(#colorLiteral(red: 0.553298533, green: 0.7063716054, blue: 0.8822532296, alpha: 1)))

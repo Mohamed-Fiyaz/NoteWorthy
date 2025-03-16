@@ -16,7 +16,7 @@ struct IrisView: View {
             VStack {
                 // Header with logo/image
                 VStack(spacing: 20) {
-                    Image(systemName: "brain")
+                    Image(systemName: "eye")
                         .font(.system(size: 60))
                         .foregroundColor(Color(#colorLiteral(red: 0.553298533, green: 0.7063716054, blue: 0.8822532296, alpha: 1)))
                         .padding(.top, 40)
@@ -33,6 +33,8 @@ struct IrisView: View {
                 
                 // Action buttons
                 VStack(spacing: 20) {
+                    ActionButtons()
+
                     NavigationLink(destination: IrisChatView()) {
                         HStack {
                             Image(systemName: "message.fill")
@@ -47,7 +49,6 @@ struct IrisView: View {
                         .cornerRadius(10)
                     }
                     
-                    ActionButtons()
                 }
                 .padding(.horizontal, 20)
                 
