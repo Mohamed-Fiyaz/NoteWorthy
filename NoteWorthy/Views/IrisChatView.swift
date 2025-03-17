@@ -7,6 +7,7 @@
 
 import SwiftUI
 import FirebaseAuth
+import PhotosUI
 
 struct IrisChatView: View {
     @StateObject private var viewModel = IrisViewModel()
@@ -45,6 +46,16 @@ struct IrisChatView: View {
             if let note = attachedNote {
                 AttachedNoteView(note: note) {
                     attachedNote = nil
+                    viewModel.clearAttachedDocument()
+                }
+                .padding(.horizontal)
+                .padding(.top, 8)
+            }
+            
+            // Attachment indicator for documents and images
+            if viewModel.attachedDocumentType != nil && attachedNote == nil {
+                AttachmentIndicatorView(type: viewModel.attachedDocumentType ?? "") {
+                    viewModel.clearAttachedDocument()
                 }
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -77,7 +88,7 @@ struct IrisChatView: View {
                         )
                         .padding(.leading, 4)
                 }
-                .disabled(messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .disabled(messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isChatProcessing)
             }
             .padding(.horizontal)
             .padding(.vertical, 8)
@@ -110,24 +121,24 @@ struct IrisChatView: View {
             Button("Cancel", role: .cancel) { }
         }
         .sheet(isPresented: $showingDocumentPicker) {
-            DocumentPicker(viewModel: viewModel)
-                .onDisappear {
-                    if viewModel.currentAnalysis != nil {
-                        handleAnalysisResult()
-                    }
-                }
+            DocumentPickerChat(viewModel: viewModel)
         }
         .sheet(isPresented: $showingImagePicker) {
-            ImagePickerView(viewModel: viewModel)
-                .onDisappear {
-                    if viewModel.currentAnalysis != nil {
-                        handleAnalysisResult()
-                    }
-                }
+            ImagePickerViewChat(viewModel: viewModel)
         }
         .sheet(isPresented: $showingNoteSelection) {
             NoteSelectionView { note in
                 attachedNote = note
+                viewModel.attachNote(note)
+                
+                // Add assistant message about attached note
+                let attachMessage = ChatMessage(
+                    id: UUID().uuidString,
+                    content: "I've attached the note \"**\(note.title)**\". You can now ask questions about it.",
+                    type: .assistant,
+                    timestamp: Date()
+                )
+                viewModel.addMessage(attachMessage)
             }
         }
         .alert("Error", isPresented: $viewModel.showError) {
@@ -137,8 +148,8 @@ struct IrisChatView: View {
         }
         .overlay(
             Group {
-                if viewModel.isProcessing {
-                    LoadingPopupView(isVisible: .constant(true))
+                if viewModel.isChatProcessing {
+                    ChatLoadingView()
                 }
             }
         )
@@ -157,34 +168,14 @@ struct IrisChatView: View {
         viewModel.addMessage(userMessage)
         
         // Create content to process
-        var contentToProcess = messageText
+        let contentToProcess = messageText
         
-        // If there's an attached note, include its content
-        if let note = attachedNote {
-            contentToProcess += "\n\nReferenced Note: \(note.title)\n\(note.content)"
-        }
-        
-        // Clear message field and attachment
+        // Clear message field
         messageText = ""
-        attachedNote = nil
         
         // Process the message
         Task {
             await viewModel.processMessage(contentToProcess)
-        }
-    }
-    
-    private func handleAnalysisResult() {
-        if let analysis = viewModel.currentAnalysis {
-            // Add assistant message with analysis
-            let analysisMessage = ChatMessage(
-                id: UUID().uuidString,
-                content: "Here's my analysis of your document:\n\n**Summary**\n\(analysis.summary)\n\n**Key Points**\n" + analysis.keyConcepts.map { "• \($0)" }.joined(separator: "\n"),
-                type: .assistant,
-                timestamp: Date()
-            )
-            viewModel.addMessage(analysisMessage)
-            viewModel.clearAnalysis()
         }
     }
 }
@@ -260,5 +251,194 @@ struct AttachedNoteView: View {
         .padding(8)
         .background(Color(.systemGray6))
         .cornerRadius(10)
+    }
+}
+
+struct AttachmentIndicatorView: View {
+    let type: String
+    let onRemove: () -> Void
+    
+    var body: some View {
+        HStack {
+            Image(systemName: type == "PDF" ? "doc.fill" : "photo.fill")
+                .foregroundColor(Color(#colorLiteral(red: 0.553298533, green: 0.7063716054, blue: 0.8822532296, alpha: 1)))
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Attached \(type)")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                
+                Text("Content ready for reference")
+                    .lineLimit(1)
+            }
+            
+            Spacer()
+            
+            Button(action: onRemove) {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundColor(.gray)
+            }
+        }
+        .padding(8)
+        .background(Color(.systemGray6))
+        .cornerRadius(10)
+    }
+}
+
+struct DocumentPickerChat: UIViewControllerRepresentable {
+    @ObservedObject var viewModel: IrisViewModel
+    
+    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.pdf])
+        picker.allowsMultipleSelection = false
+        picker.delegate = context.coordinator
+        return picker
+    }
+    
+    func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    class Coordinator: NSObject, UIDocumentPickerDelegate {
+        let parent: DocumentPickerChat
+        
+        init(_ parent: DocumentPickerChat) {
+            self.parent = parent
+        }
+        
+        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+            guard let url = urls.first else { return }
+            
+            // Start security-scoped resource access
+            guard url.startAccessingSecurityScopedResource() else {
+                print("Failed to access security scoped resource")
+                return
+            }
+            
+            Task {
+                await parent.viewModel.processPDF(url)
+                
+                // Add assistant message about attachment
+                await MainActor.run {
+                    let attachMessage = ChatMessage(
+                        id: UUID().uuidString,
+                        content: "I've attached your PDF document. You can now ask questions about it.",
+                        type: .assistant,
+                        timestamp: Date()
+                    )
+                    parent.viewModel.addMessage(attachMessage)
+                }
+                
+                // Stop security-scoped resource access
+                url.stopAccessingSecurityScopedResource()
+            }
+        }
+    }
+}
+
+struct ImagePickerViewChat: UIViewControllerRepresentable {
+    @ObservedObject var viewModel: IrisViewModel
+    
+    func makeUIViewController(context: Context) -> PHPickerViewController {
+        var config = PHPickerConfiguration()
+        config.filter = .images
+        config.selectionLimit = 1
+        
+        let picker = PHPickerViewController(configuration: config)
+        picker.delegate = context.coordinator
+        return picker
+    }
+    
+    func updateUIViewController(_ uiViewController: PHPickerViewController, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    class Coordinator: NSObject, PHPickerViewControllerDelegate {
+        let parent: ImagePickerViewChat
+        
+        init(_ parent: ImagePickerViewChat) {
+            self.parent = parent
+        }
+        
+        func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+            picker.dismiss(animated: true)
+            
+            guard let result = results.first else { return }
+            
+            result.itemProvider.loadObject(ofClass: UIImage.self) { reading, error in
+                guard let image = reading as? UIImage, error == nil else {
+                    print("Error loading image: \(error?.localizedDescription ?? "Unknown error")")
+                    return
+                }
+                
+                Task {
+                    await self.parent.viewModel.processImage(image)
+                    
+                    // Add assistant message about attachment
+                    await MainActor.run {
+                        let attachMessage = ChatMessage(
+                            id: UUID().uuidString,
+                            content: "I've attached your image. You can now ask questions about the content in it.",
+                            type: .assistant,
+                            timestamp: Date()
+                        )
+                        self.parent.viewModel.addMessage(attachMessage)
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct ChatLoadingView: View {
+    @State private var isAnimating = false
+    
+    var body: some View {
+        VStack {
+            Spacer()
+            
+            HStack {
+                Spacer()
+                
+                VStack(spacing: 12) {
+                    // Typing indicator with 3 dots
+                    HStack(spacing: 8) {
+                        ForEach(0..<3) { index in
+                            Circle()
+                                .fill(Color(#colorLiteral(red: 0.553298533, green: 0.7063716054, blue: 0.8822532296, alpha: 1)))
+                                .frame(width: 8, height: 8)
+                                .scaleEffect(isAnimating ? 1.0 : 0.5)
+                                .animation(
+                                    Animation.easeInOut(duration: 0.6)
+                                        .repeatForever()
+                                        .delay(Double(index) * 0.2),
+                                    value: isAnimating
+                                )
+                        }
+                    }
+                    
+                    Text("Iris is typing...")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+                .padding()
+                .background(Color(.systemBackground))
+                .cornerRadius(20)
+                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                .padding()
+                
+                Spacer()
+            }
+            
+            Spacer()
+        }
+        .background(Color.black.opacity(0.01))
+        .onAppear {
+            isAnimating = true
+        }
     }
 }

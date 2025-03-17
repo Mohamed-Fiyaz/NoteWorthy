@@ -7,20 +7,23 @@
 
 import Foundation
 import SwiftUI
+
 struct HeaderView: View {
     var body: some View {
-        VStack(spacing: 10) {
-            Spacer()
-            Image(systemName: "eye.fill")
-                .font(.system(size: 34))
+        VStack(spacing: 15) {
+            Image(systemName: "eye")
+                .font(.system(size: 60))
+                .foregroundColor(Color(#colorLiteral(red: 0.553298533, green: 0.7063716054, blue: 0.8822532296, alpha: 1)))
             
             Text("Iris")
-                .font(.custom("JetBrainsMono-Regular", size: 34))
+                .font(.largeTitle)
+                .fontWeight(.bold)
             
-            Text("Make your studying more efficient with Iris")
-                .font(.custom("JetBrainsMono-Regular", size: 24))
-                .multilineTextAlignment(.center)
-                .padding(.top, 10)
+            Text("Your intelligent note assistant")
+                .font(.subheadline)
+                .foregroundColor(.gray)
         }
+        .padding(.top, 20)
+        .padding(.bottom, 10)
     }
 }

@@ -6,13 +6,13 @@
 //
 
 import Foundation
+import GoogleGenerativeAI
 
 class GeminiService {
-    private let apiKey: String
-    private let baseURL = "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent"
+    private let model: GenerativeModel
     
     init(apiKey: String) {
-        self.apiKey = apiKey
+        model = GenerativeModel(name: "gemini-1.5-flash", apiKey: apiKey)
     }
     
     func analyzeDocument(_ text: String) async throws -> DocumentAnalysis {
@@ -34,22 +34,39 @@ class GeminiService {
             "importantPoints": ["point 1", "point 2", ...]
         }
         """
-
         
-        let response = try await sendRequest(prompt: prompt)
-        return try parseAnalysisResponse(response)
+        let response = try await model.generateContent(prompt)
+        guard let responseText = response.text else {
+            throw NSError(domain: "GeminiService", code: 1, userInfo: [NSLocalizedDescriptionKey: "No response text"])
+        }
+        
+        // Extract JSON content
+        if let jsonStartIndex = responseText.firstIndex(of: "{"),
+           let jsonEndIndex = responseText.lastIndex(of: "}") {
+            let jsonString = String(responseText[jsonStartIndex...jsonEndIndex])
+            
+            guard let jsonData = jsonString.data(using: .utf8) else {
+                throw NSError(domain: "GeminiService", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to convert response to data"])
+            }
+            
+            let decoder = JSONDecoder()
+            return try decoder.decode(DocumentAnalysis.self, from: jsonData)
+        } else {
+            throw NSError(domain: "GeminiService", code: 3, userInfo: [NSLocalizedDescriptionKey: "Could not find valid JSON in response"])
+        }
     }
     
     func chat(prompt: String) async throws -> String {
+        // Enhanced chat prompt that better handles document context
         let wrappedPrompt = """
         User Message:
         \(prompt)
         
-        Respond in a helpful, concise manner with accurate information.
+        Respond in a helpful, concise manner with accurate information. If document content is provided as context, use it to provide detailed and specific answers. If asked about specific information from the document, quote relevant sections when possible to support your answer.
         """
         
-        let response = try await sendRequest(prompt: wrappedPrompt)
-        return try parseChatResponse(response)
+        let response = try await model.generateContent(wrappedPrompt)
+        return response.text ?? "Unable to generate response"
     }
     
     func generateQA(text: String) async throws -> [String: Any] {
@@ -75,117 +92,70 @@ class GeminiService {
         }
         """
         
-        let response = try await sendRequest(prompt: prompt)
-        return try parseQAResponse(response)
-    }
-    
-    private func sendRequest(prompt: String) async throws -> [String: Any] {
-        guard let url = URL(string: "\(baseURL)?key=\(apiKey)") else {
-            throw NSError(domain: "GeminiService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
+        let response = try await model.generateContent(prompt)
+        guard let responseText = response.text else {
+            throw NSError(domain: "GeminiService", code: 1, userInfo: [NSLocalizedDescriptionKey: "No response text"])
         }
         
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        // Extract JSON content
+        let jsonPattern = "\\{[\\s\\S]*\\}"
+        let regex = try NSRegularExpression(pattern: jsonPattern, options: [])
+        let range = NSRange(responseText.startIndex..., in: responseText)
         
-        let requestBody: [String: Any] = [
-            "contents": [
-                [
-                    "parts": [
-                        [
-                            "text": prompt
-                        ]
-                    ]
-                ]
-            ]
-        ]
-        
-        let jsonData = try JSONSerialization.data(withJSONObject: requestBody)
-        request.httpBody = jsonData
-        
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            throw NSError(domain: "GeminiService", code: 2, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])
-        }
-        
-        guard let responseJSON = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            throw NSError(domain: "GeminiService", code: 3, userInfo: [NSLocalizedDescriptionKey: "Invalid JSON response"])
-        }
-        
-        return responseJSON
-    }
-    
-    private func parseAnalysisResponse(_ response: [String: Any]) throws -> DocumentAnalysis {
-        guard let candidates = response["candidates"] as? [[String: Any]],
-              let firstCandidate = candidates.first,
-              let content = firstCandidate["content"] as? [String: Any],
-              let parts = content["parts"] as? [[String: Any]],
-              let firstPart = parts.first,
-              let text = firstPart["text"] as? String else {
-            throw NSError(domain: "GeminiService", code: 4, userInfo: [NSLocalizedDescriptionKey: "Failed to parse response"])
-        }
-
-        // Extract the JSON part from the response
-        guard let jsonStartIndex = text.firstIndex(of: "{"),
-              let jsonEndIndex = text.lastIndex(of: "}") else {
+        guard let match = regex.firstMatch(in: responseText, options: [], range: range),
+              let jsonRange = Range(match.range, in: responseText) else {
             throw NSError(domain: "GeminiService", code: 5, userInfo: [NSLocalizedDescriptionKey: "No JSON found in response"])
         }
-
-        let jsonStr = String(text[jsonStartIndex...jsonEndIndex])
-
+        
+        let jsonStr = String(responseText[jsonRange])
+        
         guard let jsonData = jsonStr.data(using: .utf8),
               let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] else {
             throw NSError(domain: "GeminiService", code: 6, userInfo: [NSLocalizedDescriptionKey: "Failed to parse JSON"])
         }
-
-        guard let mainTopics = json["mainTopics"] as? [String],
-              let keyConcepts = json["keyConcepts"] as? [String],
-              let summary = json["summary"] as? String,
-              let importantPoints = json["importantPoints"] as? [String] else {
-            throw NSError(domain: "GeminiService", code: 7, userInfo: [NSLocalizedDescriptionKey: "Missing required fields in JSON"])
-        }
-
-        return DocumentAnalysis(mainTopics: mainTopics, keyConcepts: keyConcepts, summary: summary, importantPoints: importantPoints)
-    }
-
-    
-    private func parseChatResponse(_ response: [String: Any]) throws -> String {
-        guard let candidates = response["candidates"] as? [[String: Any]],
-              let firstCandidate = candidates.first,
-              let content = firstCandidate["content"] as? [String: Any],
-              let parts = content["parts"] as? [[String: Any]],
-              let firstPart = parts.first,
-              let text = firstPart["text"] as? String else {
-            throw NSError(domain: "GeminiService", code: 4, userInfo: [NSLocalizedDescriptionKey: "Failed to parse response"])
-        }
         
-        return text
-    }
-    
-    private func parseQAResponse(_ response: [String: Any]) throws -> [String: Any] {
-        guard let candidates = response["candidates"] as? [[String: Any]],
-              let firstCandidate = candidates.first,
-              let content = firstCandidate["content"] as? [String: Any],
-              let parts = content["parts"] as? [[String: Any]],
-              let firstPart = parts.first,
-              let text = firstPart["text"] as? String else {
-            throw NSError(domain: "GeminiService", code: 4, userInfo: [NSLocalizedDescriptionKey: "Failed to parse response"])
-        }
-        
-        // Extract the JSON part from the response
-        guard let jsonStartIndex = text.firstIndex(of: "{"),
-              let jsonEndIndex = text.lastIndex(of: "}") else {
-            throw NSError(domain: "GeminiService", code: 5, userInfo: [NSLocalizedDescriptionKey: "No JSON found in response"])
-        }
-        
-        let jsonStr = String(text[jsonStartIndex...jsonEndIndex])
-        
-        guard let jsonData = jsonStr.data(using: .utf8),
-              let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] else {
-            throw NSError(domain: "GeminiService", code: 6, userInfo: [NSLocalizedDescriptionKey: "Failed to parse JSON"])
+        // Make sure the expected structure is there
+        if json["questions"] as? [[String: String]] == nil {
+            throw NSError(domain: "GeminiService", code: 7, userInfo: [NSLocalizedDescriptionKey: "Missing questions array in response"])
         }
         
         return json
+    }
+    
+    // Function to extract specific information from a document
+    func extractInformation(fromDocument text: String, query: String) async throws -> String {
+        let prompt = """
+        I have the following document content and a specific query about it. Please answer the query based only on the information in the document. If the answer is not in the document, please indicate that.
+        
+        Document content:
+        \(text)
+        
+        Query: \(query)
+        
+        Please provide a detailed and specific answer.
+        """
+        
+        let response = try await model.generateContent(prompt)
+        return response.text ?? "Unable to extract information"
+    }
+    
+    // Function to search for specific terms in a document
+    func searchInDocument(text: String, searchTerm: String) async throws -> String {
+        let prompt = """
+        Find and extract all relevant information about "\(searchTerm)" from the following document:
+        
+        Document content:
+        \(text)
+        
+        If "\(searchTerm)" is mentioned, please provide:
+        1. The context in which it appears
+        2. Any relevant details associated with it
+        3. Direct quotes containing the term, if possible
+        
+        If "\(searchTerm)" is not found in the document, please indicate that.
+        """
+        
+        let response = try await model.generateContent(prompt)
+        return response.text ?? "Unable to search document"
     }
 }

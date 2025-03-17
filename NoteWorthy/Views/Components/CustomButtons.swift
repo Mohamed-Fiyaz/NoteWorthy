@@ -10,20 +10,35 @@ import SwiftUI
 struct CustomButton: View {
     let icon: String
     let title: String
+    let description: String
     let action: () -> Void
     
     var body: some View {
         Button(action: action) {
             HStack {
                 Image(systemName: icon)
-                    .foregroundColor(.primary)
-                Text(title)
-                    .foregroundColor(.primary)
+                    .font(.title2)
+                    .frame(width: 30)
+                
+                VStack(alignment: .leading) {
+                    Text(title)
+                        .font(.headline)
+                    
+                    Text(description)
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(.gray)
             }
-            .frame(maxWidth: .infinity)
             .padding()
-            .background(Color(UIColor.systemBackground))
+            .background(Color(.systemGray6))
             .cornerRadius(10)
         }
+        .buttonStyle(PlainButtonStyle())
     }
 }

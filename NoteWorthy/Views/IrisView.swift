@@ -4,109 +4,55 @@
 //
 //  Created by Mohamed Fiyaz on 10/01/25.
 //
-
 import SwiftUI
 import UIKit
 
 struct IrisView: View {
-    @State private var showingChatView = false
-    
-    var body: some View {
-        NavigationView {
-            VStack {
-                // Header with logo/image
-                VStack(spacing: 20) {
-                    Image(systemName: "eye")
-                        .font(.system(size: 60))
-                        .foregroundColor(Color(#colorLiteral(red: 0.553298533, green: 0.7063716054, blue: 0.8822532296, alpha: 1)))
-                        .padding(.top, 40)
-                    
-                    Text("Iris")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                    
-                    Text("Your intelligent note assistant")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                        .padding(.bottom, 40)
-                }
-                
-                // Action buttons
-                VStack(spacing: 20) {
-                    ActionButtons()
-
-                    NavigationLink(destination: IrisChatView()) {
-                        HStack {
-                            Image(systemName: "message.fill")
-                                .font(.title2)
-                            Text("Chat with Iris")
-                                .font(.headline)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color(#colorLiteral(red: 0.553298533, green: 0.7063716054, blue: 0.8822532296, alpha: 1)))
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                    }
-                    
-                }
-                .padding(.horizontal, 20)
-                
-                Spacer()
-            }
-            .navigationBarHidden(true)
-        }
-    }
-}
-
-struct ActionButtons: View {
-    @EnvironmentObject private var noteService: NoteService
-    @State private var showingNoteSelection = false
+    @StateObject private var viewModel = IrisViewModel()
     @State private var showingDocumentPicker = false
     @State private var showingImagePicker = false
-    @StateObject private var viewModel = IrisViewModel()
-    @State private var showDocumentProcessing = false
+    @State private var selectedNote: Note?
+    @State private var showingDocumentProcessing = false
     @State private var showLoadingPopup = false
+    @EnvironmentObject private var noteService: NoteService
     
     var body: some View {
-        VStack(spacing: 15) {
-            ActionButton(
-                icon: "doc.text.fill",
-                title: "Analyze a Note",
-                description: "Get insights from your notes"
-            ) {
-                showingNoteSelection = true
-            }
-            
-            ActionButton(
-                icon: "doc.fill",
-                title: "Analyze a PDF",
-                description: "Upload and process PDF documents"
-            ) {
-                showingDocumentPicker = true
-            }
-            
-            ActionButton(
-                icon: "photo.fill",
-                title: "Analyze an Image",
-                description: "Process text from images"
-            ) {
-                showingImagePicker = true
-            }
-        }
-        .sheet(isPresented: $showingNoteSelection) {
-            NoteSelectionView { note in
-                Task {
-                    await viewModel.processNote(note)
+        ScrollView {
+            VStack(spacing: 20) {
+                HeaderView()
+                
+                ActionButtonsView(
+                    showingDocumentPicker: $showingDocumentPicker,
+                    showingImagePicker: $showingImagePicker,
+                    selectedNote: $selectedNote,
+                    viewModel: viewModel,
+                    showLoadingPopup: $showLoadingPopup
+                )
+                .environmentObject(noteService)
+                
+                NavigationLink(destination: IrisChatView()) {
+                    HStack {
+                        Image(systemName: "message.fill")
+                            .font(.title2)
+                        Text("Chat with Iris")
+                            .font(.headline)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color(#colorLiteral(red: 0.553298533, green: 0.7063716054, blue: 0.8822532296, alpha: 1)))
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
             }
-            .environmentObject(noteService)
+            .padding()
         }
         .sheet(isPresented: $showingDocumentPicker) {
             DocumentPicker(viewModel: viewModel)
                 .onDisappear {
                     if viewModel.currentAnalysis != nil {
-                        showDocumentProcessing = true
+                        showingDocumentProcessing = true
                     }
                 }
         }
@@ -114,13 +60,25 @@ struct ActionButtons: View {
             ImagePickerView(viewModel: viewModel)
                 .onDisappear {
                     if viewModel.currentAnalysis != nil {
-                        showDocumentProcessing = true
+                        showingDocumentProcessing = true
                     }
                 }
         }
-        .sheet(isPresented: $showDocumentProcessing) {
+        .sheet(item: $selectedNote) { note in
+            NoteSummaryView(note: note, viewModel: viewModel)
+        }
+        .sheet(isPresented: $showingDocumentProcessing) {
             DocumentProcessingView(viewModel: viewModel)
                 .environmentObject(noteService)
+                .onDisappear {
+                    // Reset when the document processing view is dismissed
+                    viewModel.clearAnalysis()
+                }
+        }
+        .alert("Error", isPresented: $viewModel.showError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(viewModel.errorMessage)
         }
         .overlay(
             Group {
@@ -132,47 +90,12 @@ struct ActionButtons: View {
         .onChange(of: viewModel.isProcessing) { isProcessing in
             showLoadingPopup = isProcessing
         }
-        .onChange(of: viewModel.currentAnalysis) { _ in
-            if viewModel.currentAnalysis != nil {
-                showDocumentProcessing = true
+        .onChange(of: viewModel.currentAnalysis) { newValue in
+            if newValue != nil && selectedNote == nil {
+                showingDocumentProcessing = true
             }
         }
     }
 }
 
-struct ActionButton: View {
-    let icon: String
-    let title: String
-    let description: String
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            HStack {
-                Image(systemName: icon)
-                    .font(.title2)
-                    .frame(width: 30)
-                
-                VStack(alignment: .leading) {
-                    Text(title)
-                        .font(.headline)
-                    
-                    Text(description)
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-            }
-            .padding()
-            .background(Color(.systemGray6))
-            .cornerRadius(10)
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-}
 

@@ -23,6 +23,7 @@ struct ActionButtonsView: View {
             CustomButton(
                 icon: "doc.text",
                 title: "Summarize Note",
+                description: "Get insights from your notes",
                 action: {
                     viewModel.clearAnalysis()
                     showingNoteSelector = true
@@ -32,6 +33,7 @@ struct ActionButtonsView: View {
             CustomButton(
                 icon: "camera",
                 title: "Scan Document",
+                description: "Capture and process text from images",
                 action: {
                     viewModel.clearAnalysis()
                     showingCameraSheet = true
@@ -41,6 +43,7 @@ struct ActionButtonsView: View {
             CustomButton(
                 icon: "doc.badge.plus",
                 title: "Upload PDF",
+                description: "Process PDF documents for analysis",
                 action: {
                     viewModel.clearAnalysis()
                     showingDocumentPicker = true
@@ -51,9 +54,17 @@ struct ActionButtonsView: View {
             NoteSelectionView { note in
                 selectedNote = note
             }
+            .environmentObject(noteService)
         }
         .sheet(isPresented: $showingCameraSheet) {
             CameraView(viewModel: viewModel)
+                .onDisappear {
+                    if viewModel.currentAnalysis != nil {
+                        showLoadingPopup = true
+                    }
+                }
         }
     }
 }
+
+
