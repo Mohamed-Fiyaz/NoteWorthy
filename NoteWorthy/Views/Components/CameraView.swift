@@ -35,7 +35,7 @@ struct CameraView: UIViewControllerRepresentable {
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             if let image = info[.originalImage] as? UIImage {
                 Task {
-                    await parent.viewModel.processImage(image)
+                    await parent.viewModel.processImageWithAnalysis(image)
                 }
             }
             parent.dismiss()

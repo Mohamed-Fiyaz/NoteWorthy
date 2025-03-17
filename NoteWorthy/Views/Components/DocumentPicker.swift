@@ -44,9 +44,9 @@ struct DocumentPicker: UIViewControllerRepresentable {
                 return
             }
             
-            // Process the document
+            // Process the document with analysis
             Task {
-                await parent.viewModel.processPDF(url)
+                await parent.viewModel.processPDFWithAnalysis(url)
                 // Stop accessing the resource
                 url.stopAccessingSecurityScopedResource()
             }

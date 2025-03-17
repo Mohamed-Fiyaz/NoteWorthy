@@ -36,6 +36,7 @@ struct ActionButtonsView: View {
                 description: "Capture and process text from images",
                 action: {
                     viewModel.clearAnalysis()
+                    showLoadingPopup = true // Show loading popup before camera opens
                     showingCameraSheet = true
                 }
             )
@@ -46,6 +47,7 @@ struct ActionButtonsView: View {
                 description: "Process PDF documents for analysis",
                 action: {
                     viewModel.clearAnalysis()
+                    showLoadingPopup = true // Show loading popup before document picker opens
                     showingDocumentPicker = true
                 }
             )
@@ -53,18 +55,36 @@ struct ActionButtonsView: View {
         .sheet(isPresented: $showingNoteSelector) {
             NoteSelectionView { note in
                 selectedNote = note
+                showLoadingPopup = true // Show loading popup when processing a note
+                Task {
+                    await viewModel.processNote(note)
+                }
             }
             .environmentObject(noteService)
         }
         .sheet(isPresented: $showingCameraSheet) {
             CameraView(viewModel: viewModel)
                 .onDisappear {
-                    if viewModel.currentAnalysis != nil {
-                        showLoadingPopup = true
+                    // Hide loading popup if camera was dismissed without processing
+                    if !viewModel.isProcessing && viewModel.currentAnalysis == nil {
+                        showLoadingPopup = false
                     }
                 }
         }
+        .onChange(of: showingDocumentPicker) { isShowing in
+            if !isShowing && !viewModel.isProcessing && viewModel.currentAnalysis == nil {
+                // Hide loading popup if document picker was dismissed without processing
+                showLoadingPopup = false
+            }
+        }
+        .onChange(of: showingCameraSheet) { isShowing in
+            if !isShowing && !viewModel.isProcessing && viewModel.currentAnalysis == nil {
+                // Hide loading popup if camera was dismissed without processing
+                showLoadingPopup = false
+            }
+        }
+        .onChange(of: viewModel.isProcessing) { isProcessing in
+            showLoadingPopup = isProcessing
+        }
     }
 }
-
-

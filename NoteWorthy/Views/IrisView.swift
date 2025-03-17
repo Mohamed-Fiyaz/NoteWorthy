@@ -73,6 +73,8 @@ struct IrisView: View {
                 .onDisappear {
                     // Reset when the document processing view is dismissed
                     viewModel.clearAnalysis()
+                    // Ensure loading popup is hidden
+                    showLoadingPopup = false
                 }
         }
         .alert("Error", isPresented: $viewModel.showError) {
@@ -82,8 +84,8 @@ struct IrisView: View {
         }
         .overlay(
             Group {
-                if showLoadingPopup {
-                    LoadingPopupView(isVisible: $showLoadingPopup)
+                if showLoadingPopup || viewModel.isProcessing {
+                    LoadingPopupView(isVisible: .constant(true))
                 }
             }
         )
@@ -91,11 +93,10 @@ struct IrisView: View {
             showLoadingPopup = isProcessing
         }
         .onChange(of: viewModel.currentAnalysis) { newValue in
-            if newValue != nil && selectedNote == nil {
+            if newValue != nil {
                 showingDocumentProcessing = true
+                showLoadingPopup = false  // Hide loading popup when showing document processing
             }
         }
     }
 }
-
-
