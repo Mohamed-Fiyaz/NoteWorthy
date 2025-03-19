@@ -9,7 +9,7 @@ import SwiftUI
 
 struct NoteSelectionView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var noteService: NoteService
+    @StateObject var noteService = NoteService()
     let onNoteSelected: (Note) -> Void
     @State private var isLoading = true
     
@@ -49,6 +49,7 @@ struct NoteSelectionView: View {
             .navigationBarItems(trailing: Button("Cancel") { dismiss() })
         }
         .onAppear {
+            // Create a new instance of NoteService
             noteService.fetchNotes()
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {

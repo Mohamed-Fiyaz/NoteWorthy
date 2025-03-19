@@ -17,7 +17,7 @@ struct IrisChatView: View {
     @State private var showingImagePicker = false
     @State private var showingNoteSelection = false
     @State private var attachedNote: Note?
-    @EnvironmentObject private var noteService: NoteService
+    @StateObject private var noteService = NoteService()
     
     var body: some View {
         VStack {
@@ -153,6 +153,9 @@ struct IrisChatView: View {
                 }
             }
         )
+        .onAppear {
+            noteService.fetchNotes()
+        }
     }
     
     private func sendMessage() {
@@ -170,8 +173,10 @@ struct IrisChatView: View {
         // Create content to process
         let contentToProcess = messageText
         
-        // Clear message field
-        messageText = ""
+        // Clear message field - moved inside a MainActor to ensure UI update
+        DispatchQueue.main.async {
+            messageText = ""
+        }
         
         // Process the message
         Task {
