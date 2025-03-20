@@ -27,11 +27,17 @@ struct NoteSectionView: View {
                             .padding(.leading)
                     }
                     if notes.isEmpty && section == "Your Notes" {
-                        Text("No Notes")
+                        Text("No notes")
                             .foregroundColor(.gray)
                             .font(.subheadline)
                             .padding(.leading)
-                    } else {
+                    }
+                    if notes.isEmpty && section == "AI Generated Notes" {
+                        Text("No AI generated notes")
+                            .foregroundColor(.gray)
+                            .font(.subheadline)
+                            .padding(.leading)
+                    }else {
                         ForEach(notes.prefix(5)) { note in
                             NavigationLink(
                                 destination: NoteDetailView(note: note, noteService: noteService)
@@ -49,6 +55,7 @@ struct NoteSectionView: View {
                                 destination: FilteredNotesView(
                                     noteService: noteService,
                                     showFavoritesOnly: section == "Favorites",
+                                    showAIGeneratedOnly: section == "AI Generated Notes",
                                     title: section
                                 )
                             ) {

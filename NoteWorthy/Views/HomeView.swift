@@ -12,7 +12,7 @@ struct HomeView: View {
     @StateObject private var noteService = NoteService()
     @State private var userName: String = ""
     
-    private let sections = ["Favorites", "Your Notes"]
+    private let sections = ["Favorites", "Your Notes", "AI Generated Notes"]
     
     func fetchUserName() {
         if let user = Auth.auth().currentUser {
@@ -45,8 +45,11 @@ struct HomeView: View {
         switch section {
         case "Favorites":
             return noteService.notes.filter { $0.isFavorite }
+        case "AI Generated Notes":
+            return noteService.notes.filter { $0.isAIGenerated }
         default:
             return noteService.notes
         }
     }
 }
+

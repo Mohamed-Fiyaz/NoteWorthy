@@ -14,13 +14,15 @@ struct Note: Identifiable, Codable {
     var isFavorite: Bool
     var colorHex: String
     var userId: String // To associate notes with users
+    var isAIGenerated: Bool // To identify AI-generated notes
     
     init(id: String = UUID().uuidString,
          title: String = "",
          content: String = "",
          colorHex: String = "#FFE4E1",
          userId: String,
-         isFavorite: Bool = false) {
+         isFavorite: Bool = false,
+         isAIGenerated: Bool = false) {
         self.id = id
         self.title = title
         self.content = content
@@ -28,5 +30,6 @@ struct Note: Identifiable, Codable {
         self.isFavorite = isFavorite
         self.colorHex = colorHex
         self.userId = userId
+        self.isAIGenerated = isAIGenerated
     }
 }

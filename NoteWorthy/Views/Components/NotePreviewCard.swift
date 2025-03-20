@@ -32,7 +32,6 @@ struct NotePreviewCard: View {
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
                 }
-                
                 Spacer()
             }
             .padding()
@@ -48,6 +47,11 @@ struct NotePreviewCard: View {
                     .onTapGesture {
                         noteService.toggleFavorite(note)
                     }
+            }
+            if note.isAIGenerated {
+                Image(systemName: "sparkle")
+                    .foregroundColor(.blue)
+                    .padding(8)
             }
         }
     }

@@ -60,7 +60,8 @@ struct DocumentProcessingView: View {
             content: analysis.summary,
             colorHex: "#FFE4E1",
             userId: userId,
-            isFavorite: false
+            isFavorite: false,
+            isAIGenerated: true  // Set this flag to true for AI-generated notes
         )
         
         noteService.addNote(note)

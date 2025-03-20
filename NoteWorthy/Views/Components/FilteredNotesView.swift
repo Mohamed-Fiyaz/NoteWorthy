@@ -10,13 +10,20 @@ import SwiftUI
 struct FilteredNotesView: View {
     @ObservedObject var noteService: NoteService
     let showFavoritesOnly: Bool
+    let showAIGeneratedOnly: Bool
     let title: String
     @State private var searchText = ""
     
     var filteredNotes: [Note] {
-        let notes = showFavoritesOnly
-            ? noteService.notes.filter { $0.isFavorite }
-            : noteService.notes
+        var notes = noteService.notes
+        
+        if showFavoritesOnly {
+            notes = notes.filter { $0.isFavorite }
+        }
+        
+        if showAIGeneratedOnly {
+            notes = notes.filter { $0.isAIGenerated }
+        }
             
         if searchText.isEmpty {
             return notes
