@@ -14,6 +14,7 @@ struct NoteDetailView: View {
     @State private var editedTitle: String
     @State private var editedContent: String
     @State private var editedColor: String
+    @State private var editedIsFavorite: Bool
     @State private var showingDiscardAlert = false
     @State private var showingDeleteAlert = false
     @State private var showingQAGeneration = false
@@ -39,20 +40,32 @@ struct NoteDetailView: View {
         _editedTitle = State(initialValue: note.title)
         _editedContent = State(initialValue: note.content)
         _editedColor = State(initialValue: note.colorHex)
+        _editedIsFavorite = State(initialValue: note.isFavorite)
     }
     
     var hasChanges: Bool {
         editedTitle != note.title ||
         editedContent != note.content ||
-        editedColor != note.colorHex
+        editedColor != note.colorHex ||
+        editedIsFavorite != note.isFavorite
     }
     
     var body: some View {
         Form {
-            Section(header: Text("Note Details")) {
+            Section {
                 TextField("Title", text: $editedTitle)
                 TextEditor(text: $editedContent)
                     .frame(height: 200)
+            } header: {
+                HStack {
+                    Text("Note Details")
+                    Spacer()
+                    Image(systemName: editedIsFavorite ? "star.fill" : "star")
+                        .foregroundColor(editedIsFavorite ? .yellow : .gray)
+                        .onTapGesture {
+                            editedIsFavorite.toggle()
+                        }
+                }
             }
             
             Section(header: Text("Note Color")) {
@@ -140,6 +153,7 @@ struct NoteDetailView: View {
         updatedNote.title = editedTitle
         updatedNote.content = editedContent
         updatedNote.colorHex = editedColor
+        updatedNote.isFavorite = editedIsFavorite
         noteService.updateNote(updatedNote)
         dismiss()
     }

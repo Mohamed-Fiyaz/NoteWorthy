@@ -11,10 +11,11 @@ struct NotePreviewCard: View {
     @ObservedObject var noteService: NoteService
     let note: Note
     var isCompact: Bool = false
-    var showStar: Bool = false
+    var showStar: Bool = true
     
     var body: some View {
-        ZStack(alignment: .topLeading) {
+        ZStack {
+            // Background and content
             VStack(alignment: .center, spacing: 8) {
                 Spacer()
                 
@@ -40,19 +41,31 @@ struct NotePreviewCard: View {
             .cornerRadius(12)
             .shadow(radius: 2)
             
-            if showStar {
-                Image(systemName: note.isFavorite ? "star.fill" : "star")
-                    .foregroundColor(note.isFavorite ? .yellow : .gray)
-                    .padding(8)
-                    .onTapGesture {
-                        noteService.toggleFavorite(note)
+            // Icons overlay
+            VStack {
+                HStack {
+                    // Star icon in top left
+                    if showStar {
+                        Image(systemName: note.isFavorite ? "star.fill" : "star")
+                            .foregroundColor(note.isFavorite ? .yellow : .gray)
+                            .padding(8)
+                            .onTapGesture {
+                                noteService.toggleFavorite(note)
+                            }
                     }
+                    
+                    Spacer()
+                    
+                    // Sparkle icon in top right
+                    if note.isAIGenerated {
+                        Image(systemName: "sparkle")
+                            .foregroundColor(.blue)
+                            .padding(8)
+                    }
+                }
+                Spacer()
             }
-            if note.isAIGenerated {
-                Image(systemName: "sparkle")
-                    .foregroundColor(.blue)
-                    .padding(8)
-            }
+            .frame(width: isCompact ? 140 : 200, height: isCompact ? 100 : 130)
         }
     }
 }
