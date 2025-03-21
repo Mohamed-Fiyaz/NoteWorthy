@@ -62,6 +62,7 @@ struct NoteDetailView: View {
                     Spacer()
                     Image(systemName: editedIsFavorite ? "star.fill" : "star")
                         .foregroundColor(editedIsFavorite ? .yellow : .gray)
+                        .font(.title2)
                         .onTapGesture {
                             editedIsFavorite.toggle()
                         }
