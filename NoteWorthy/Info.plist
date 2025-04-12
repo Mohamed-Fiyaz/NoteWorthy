@@ -2,32 +2,24 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleURLTypes</key>
-    <array>
-        <dict>
-            <key>CFBundleTypeRole</key>
-            <string>Editor</string>
-            <key>CFBundleURLSchemes</key>
-            <array>
-                <string>$(GoogleURLScheme)</string>
-            </array>
-        </dict>
-    </array>
-    <key>UIAppFonts</key>
-    <array>
-        <string>PatrickHand-Regular.ttf</string>
-    </array>
-    <key>GIDClientID</key>
-    <string>$(GIDClientID)</string>
-    <key>GEMINI_API_KEY</key>
-    <string>$(GEMINI_API_KEY)</string>
-    <key>NSCameraUsageDescription</key>
-    <string>We need camera access to scan documents</string>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>We need photo library access to upload documents</string>
-    <key>NSCameraUsageDescription</key>
-    <string>We need camera access to scan documents</string>
-    <key>UIUserInterfaceStyle</key>
-    <string>Light</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>$(GoogleURLScheme)</string>
+			</array>
+		</dict>
+	</array>
+	<key>GEMINI_API_KEY</key>
+	<string>$(GEMINI_API_KEY)</string>
+	<key>GIDClientID</key>
+	<string>$(GIDClientID)</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>PatrickHand-Regular.ttf</string>
+	</array>
 </dict>
 </plist>
