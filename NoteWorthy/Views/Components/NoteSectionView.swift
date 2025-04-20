@@ -20,24 +20,19 @@ struct NoteSectionView: View {
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 15) {
-                    if notes.isEmpty && section == "Favorites" {
-                        Text("No favorites")
-                            .foregroundColor(.gray)
-                            .font(.subheadline)
-                            .padding(.leading)
-                    }
-                    if notes.isEmpty && section == "Your Notes" {
-                        Text("No notes")
-                            .foregroundColor(.gray)
-                            .font(.subheadline)
-                            .padding(.leading)
-                    }
-                    if notes.isEmpty && section == "AI Generated Notes" {
-                        Text("No AI generated notes")
-                            .foregroundColor(.gray)
-                            .font(.subheadline)
-                            .padding(.leading)
-                    }else {
+                    if noteService.isLoading {
+                        ForEach(0..<3, id: \.self) { _ in
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(width: 150, height: 120)
+                                .overlay(
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle())
+                                )
+                        }
+                    } else if notes.isEmpty {
+                        getEmptyStateView(for: section)
+                    } else {
                         ForEach(notes.prefix(5)) { note in
                             NavigationLink(
                                 destination: NoteDetailView(note: note, noteService: noteService)
@@ -50,6 +45,7 @@ struct NoteSectionView: View {
                                 )
                             }
                         }
+                        
                         if notes.count > 5 {
                             NavigationLink(
                                 destination: FilteredNotesView(
@@ -61,6 +57,12 @@ struct NoteSectionView: View {
                             ) {
                                 Text("More")
                                     .foregroundColor(Color(hex: "#8DB4E1"))
+                                    .padding(.vertical, 10)
+                                    .padding(.horizontal, 20)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color(hex: "#8DB4E1"), lineWidth: 1)
+                                    )
                             }
                         }
                     }
@@ -68,5 +70,36 @@ struct NoteSectionView: View {
                 .padding()
             }
         }
+    }
+    
+    private func getEmptyStateView(for section: String) -> some View {
+        let message: String
+        let systemImage: String
+        
+        switch section {
+        case "Favorites":
+            message = "No favorites yet"
+            systemImage = "star"
+        case "AI Generated Notes":
+            message = "No AI generated notes"
+            systemImage = "wand.and.stars"
+        default:
+            message = "No notes yet"
+            systemImage = "doc.text"
+        }
+        
+        return HStack {
+            Image(systemName: systemImage)
+                .foregroundColor(.gray)
+                .font(.system(size: 18))
+            
+            Text(message)
+                .foregroundColor(.gray)
+                .font(.subheadline)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(8)
     }
 }

@@ -22,11 +22,11 @@ struct SettingsView: View {
         ScrollView {
             VStack(spacing: 0) {
                 VStack(spacing: 20) {
-                    Image(systemName: "person.circle.fill")
+                    Image(systemName: "person.circle")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 100, height: 100)
-                        .foregroundColor(Color(red: 0.36, green: 0.58, blue: 0.89))
+                        .foregroundColor(Color(#colorLiteral(red: 0.553298533, green: 0.7063716054, blue: 0.8822532296, alpha: 1)))
 
                     VStack(spacing: 5) {
                         Text(userName)
