@@ -7,11 +7,9 @@
 
 import SwiftUI
 import FirebaseAuth
-import FirebaseStorage
 
 struct MainView: View {
     @StateObject private var noteService = NoteService()
-    @State private var profileImage: UIImage?
     @EnvironmentObject private var appState: AppState
     
     init() {
@@ -34,22 +32,11 @@ struct MainView: View {
 
             VStack(spacing: 0) {
                 HStack {
+                    Spacer()
                     Text("NoteWorthy")
-                        .font(.custom("PatrickHand-Regular", size: 28))
+                        .font(.custom("PatrickHand-Regular", size: 34))
                         .foregroundColor(.white)
                     Spacer()
-                    if let profileImage = profileImage {
-                        Image(uiImage: profileImage)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 32, height: 32)
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.white, lineWidth: 1))
-                    } else {
-                        Image(systemName: "person.crop.circle")
-                            .font(.system(size: 28))
-                            .foregroundColor(.white)
-                    }
                 }
                 .padding(.horizontal)
                 .padding(.bottom)
@@ -80,7 +67,7 @@ struct MainView: View {
                     }
 
                     NavigationView {
-                        SettingsView(profileImage: $profileImage)
+                        SettingsView()
                     }
                     .tabItem {
                         Label("Settings", systemImage: "gearshape.fill")
@@ -89,23 +76,6 @@ struct MainView: View {
                 .accentColor(.white)
                 .background(Color.white)
                 .environmentObject(noteService)
-            }
-        }
-        .onAppear {
-            loadProfileImage()
-        }
-    }
-    
-    private func loadProfileImage() {
-        guard let user = Auth.auth().currentUser else { return }
-        let storageRef = Storage.storage().reference()
-        let imageRef = storageRef.child("profile_images/\(user.uid).jpg")
-        
-        imageRef.getData(maxSize: 4 * 1024 * 1024) { data, error in
-            if let imageData = data, let image = UIImage(data: imageData) {
-                DispatchQueue.main.async {
-                    self.profileImage = image
-                }
             }
         }
     }
