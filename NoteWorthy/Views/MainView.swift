@@ -11,19 +11,7 @@ import FirebaseAuth
 struct MainView: View {
     @StateObject private var noteService = NoteService()
     @EnvironmentObject private var appState: AppState
-    
-    init() {
-        let appearance = UITabBarAppearance()
-        appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor(Color(#colorLiteral(red: 0.553298533, green: 0.7063716054, blue: 0.8822532296, alpha: 1)))
-        appearance.stackedLayoutAppearance.normal.iconColor = UIColor(red: 92/255, green: 122/255, blue: 153/255, alpha: 1.0)
-        appearance.stackedLayoutAppearance.selected.iconColor = UIColor.white
-        appearance.stackedLayoutAppearance.normal.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor(red: 92/255, green: 122/255, blue: 153/255, alpha: 1.0)]
-        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
-
-        UITabBar.appearance().standardAppearance = appearance
-        UITabBar.appearance().scrollEdgeAppearance = appearance
-    }
+    @State private var selectedTab: Int = 0
     
     var body: some View {
         ZStack {
@@ -43,13 +31,14 @@ struct MainView: View {
                 .frame(maxWidth: .infinity)
                 .background(Color(#colorLiteral(red: 0.553298533, green: 0.7063716054, blue: 0.8822532296, alpha: 1)))
 
-                TabView {
+                TabView(selection: $selectedTab) {
                     NavigationView {
                         HomeView()
                     }
                     .tabItem {
                         Label("Home", systemImage: "house.fill")
                     }
+                    .tag(0)
 
                     NavigationView {
                         NotesView()
@@ -57,6 +46,7 @@ struct MainView: View {
                     .tabItem {
                         Label("Notes", systemImage: "note.text")
                     }
+                    .tag(1)
 
                     NavigationView {
                         IrisView()
@@ -65,6 +55,7 @@ struct MainView: View {
                     .tabItem {
                         Label("Iris", systemImage: "eye.fill")
                     }
+                    .tag(2)
 
                     NavigationView {
                         SettingsView()
@@ -72,11 +63,13 @@ struct MainView: View {
                     .tabItem {
                         Label("Settings", systemImage: "gearshape.fill")
                     }
+                    .tag(3)
                 }
-                .accentColor(.white)
+                .tint(.blue)
                 .background(Color.white)
                 .environmentObject(noteService)
             }
         }
     }
 }
+

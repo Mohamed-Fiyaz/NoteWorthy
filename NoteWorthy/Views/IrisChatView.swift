@@ -9,6 +9,16 @@ import SwiftUI
 import FirebaseAuth
 import PhotosUI
 
+private extension View {
+    func dismissKeyboardOnTap() -> some View {
+        self.simultaneousGesture(
+            TapGesture().onEnded { _ in
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            }
+        )
+    }
+}
+
 struct IrisChatView: View {
     @StateObject private var viewModel = IrisViewModel()
     @State private var messageText = ""
@@ -100,6 +110,7 @@ struct IrisChatView: View {
                 alignment: .top
             )
         }
+        .dismissKeyboardOnTap()
         .navigationTitle("Iris Assistant")
         .confirmationDialog(
             "Attach Content",

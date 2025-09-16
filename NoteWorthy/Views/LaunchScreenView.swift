@@ -21,7 +21,7 @@ struct LaunchScreenView: View {
                 }
                 Spacer()
                 HStack {
-                    Text("Made By Fiyaz & Westley")
+                    Text("Made By Mohamed Fiyaz")
                         .foregroundColor(.white)
                 }
             }
